@@ -20,12 +20,11 @@ app.use('/api/cart', cartRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 
-const port = Number(process.env.PORT || 4000);
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${port}`);
-});
+if (process.env.VERCEL !== '1') {
+  const port = Number(process.env.PORT || 4000);
+  app.listen(port, () => console.log(`Server listening on port ${port}`));
+}
 
 export default app;

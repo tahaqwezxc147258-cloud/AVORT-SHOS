@@ -1,29 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+function verifyToken(req: Request, res: Response) {
+  if (!process.env.JWT_SECRET) {
+    res.status(500).json({ error: 'JWT_SECRET is not configured' });
+    return null;
+  }
   const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: 'Unauthorized' });
-  const token = auth.replace(/^Bearer\s+/, '');
+  if (!auth) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return null;
+  }
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
-    if (decoded.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
-    (req as any).user = decoded;
-    next();
-  } catch (e) {
-    return res.status(401).json({ error: 'Invalid token' });
+    return jwt.verify(auth.replace(/^Bearer\s+/, ''), process.env.JWT_SECRET) as jwt.JwtPayload;
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
   }
 }
 
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const decoded = verifyToken(req, res);
+  if (!decoded) return;
+  if (decoded.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+  (req as any).user = decoded;
+  next();
+}
+
 export function requireUser(req: Request, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: 'Unauthorized' });
-  const token = auth.replace(/^Bearer\s+/, '');
-  try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
-    (req as any).user = decoded;
-    next();
-  } catch {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
+  const decoded = verifyToken(req, res);
+  if (!decoded) return;
+  (req as any).user = decoded;
+  next();
 }
