@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /profile
+Disallow: /admin
+
+Sitemap: https://noir-sneaker-store.vercel.app/sitemap.xml

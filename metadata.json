@@ -1,0 +1,6 @@
+{
+  "name": "فروشگاه اِی‌وُرت",
+  "description": "فروشگاه آنلاین تخصصی کفش‌های نایک و جردن با طراحی مدرن، فارسی و RTL",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
