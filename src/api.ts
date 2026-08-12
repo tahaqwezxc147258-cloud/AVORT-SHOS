@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 type RequestOptions = RequestInit & { query?: Record<string, any> };
 
 // Production uses the separate Express API; local development falls back to Vite's proxy.
@@ -15,7 +17,12 @@ function buildUrl(path: string, query?: Record<string, any>) {
 
 export async function request<T = any>(path: string, opts: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem('noir_token');
+  // Prefer a Supabase Auth session when available. The legacy OTP flow still
+  // falls back to its app JWT until authentication is fully migrated.
+  const { data: { session } } = supabase
+    ? await supabase.auth.getSession()
+    : { data: { session: null } };
+  const token = session?.access_token || localStorage.getItem('noir_token');
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(buildUrl(path, opts.query), { ...opts, headers });
