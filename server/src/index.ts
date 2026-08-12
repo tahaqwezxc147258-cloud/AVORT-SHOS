@@ -15,6 +15,7 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 
 const apiRouter = express.Router();
+apiRouter.use('/', authRouter);
 apiRouter.use('/products', productsRouter);
 apiRouter.use('/session', authRouter);
 apiRouter.use('/cart', cartRouter);
