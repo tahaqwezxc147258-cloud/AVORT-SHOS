@@ -44,11 +44,15 @@ export const AdminPanel: React.FC = () => {
       const image = new Image();
       image.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
+        // Vercel serverless requests have a small payload limit. Do not send
+        // original camera-sized images as base64 in the product JSON.
+        const maxDimension = 1400;
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
         const context = canvas.getContext('2d');
         if (!context) return resolve(reader.result as string);
-        context.drawImage(image, 0, 0);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
         const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
         const { data, width, height } = pixels;
         const visited = new Uint8Array(width * height);
@@ -68,7 +72,7 @@ export const AdminPanel: React.FC = () => {
           if (index < width * (height - 1)) queue.push(index + width);
         }
         context.putImageData(pixels, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
+        resolve(canvas.toDataURL('image/webp', 0.82));
       };
       image.onerror = () => resolve(reader.result as string);
       image.src = reader.result as string;
