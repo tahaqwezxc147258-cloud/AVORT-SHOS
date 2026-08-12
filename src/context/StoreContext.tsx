@@ -382,8 +382,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     productUpdateTimers.current[id] = setTimeout(async () => {
       try {
         await api.put(`/products/${id}`, updatedFields);
-      } catch {
-        // Keep the optimistic local edit when the API is unavailable.
+      } catch (error) {
+        console.error('Product update failed:', error);
       }
     }, 450);
   };

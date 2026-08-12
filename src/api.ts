@@ -1,6 +1,7 @@
 type RequestOptions = RequestInit & { query?: Record<string, any> };
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+// Production uses the separate Express API; local development falls back to Vite's proxy.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
 
 function buildUrl(path: string, query?: Record<string, any>) {
   let url = `${API_BASE}${path}`;
