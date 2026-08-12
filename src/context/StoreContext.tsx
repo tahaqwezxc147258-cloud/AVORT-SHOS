@@ -207,7 +207,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const requestOtp = async (phone: string) => {
     try {
-      const res: any = await api.post('/auth/request-otp', { phone });
+      const res: any = await api.post('/session/request-otp', { phone });
       return res && (res.success === undefined ? true : res.success);
     } catch (e) {
       // Development fallback: the storefront remains testable without the API server.
@@ -221,7 +221,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
       .replace(/[\s-]/g, '');
     try {
-      const res: any = await api.post('/auth/verify-otp', { phone, code });
+      const res: any = await api.post('/session/verify-otp', { phone, code });
       if (res && res.token && res.user) {
         setToken(res.token);
         setUser(res.user);

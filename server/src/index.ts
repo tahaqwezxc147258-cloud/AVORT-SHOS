@@ -16,7 +16,7 @@ app.use(express.json({ limit: '5mb' }));
 
 const apiRouter = express.Router();
 apiRouter.use('/products', productsRouter);
-apiRouter.use('/auth', authRouter);
+apiRouter.use('/session', authRouter);
 apiRouter.use('/cart', cartRouter);
 apiRouter.use('/orders', ordersRouter);
 apiRouter.use('/payments', paymentsRouter);
