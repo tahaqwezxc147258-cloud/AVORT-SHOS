@@ -10,7 +10,7 @@ import paymentsRouter from './routes/payments.js';
 dotenv.config();
 
 const app = express();
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(value => value.trim()).filter(Boolean);
+const allowedOrigins = (process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(value => value.trim()).filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 
