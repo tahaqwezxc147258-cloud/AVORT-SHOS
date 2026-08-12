@@ -14,13 +14,16 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL ||
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 
-app.use('/api/products', productsRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/cart', cartRouter);
-app.use('/api/orders', ordersRouter);
-app.use('/api/payments', paymentsRouter);
+const apiRouter = express.Router();
+apiRouter.use('/products', productsRouter);
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/cart', cartRouter);
+apiRouter.use('/orders', ordersRouter);
+apiRouter.use('/payments', paymentsRouter);
+apiRouter.get('/health', (_req, res) => res.json({ ok: true }));
 
-app.get('/health', (_req, res) => res.json({ ok: true }));
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 if (process.env.VERCEL !== '1') {
   const port = Number(process.env.PORT || 4000);
