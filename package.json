@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "postinstall": "prisma generate --schema=server/prisma/schema.prisma",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
@@ -12,7 +11,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^6.7.0",
     "@supabase/supabase-js": "^2.112.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
@@ -23,7 +21,6 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "prisma": "^6.7.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "vite": "^6.2.3"

@@ -1,43 +1,9 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { supabase } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
-
-const prisma = new PrismaClient();
 const router = Router();
-
-router.get('/', async (_req, res) => {
-  const products = await prisma.product.findMany();
-  res.json({ products });
-});
-
-router.post('/', requireAdmin, async (req, res) => {
-  const body = req.body;
-  try {
-    const created = await prisma.product.create({ data: { ...body } });
-    res.json({ product: created });
-  } catch (e) {
-    res.status(400).json({ error: String(e) });
-  }
-});
-
-router.put('/:id', requireAdmin, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const updated = await prisma.product.update({ where: { id }, data: req.body });
-    res.json({ product: updated });
-  } catch (e) {
-    res.status(400).json({ error: String(e) });
-  }
-});
-
-router.delete('/:id', requireAdmin, async (req, res) => {
-  const { id } = req.params;
-  try {
-    await prisma.product.delete({ where: { id } });
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(400).json({ error: String(e) });
-  }
-});
-
+router.get('/', async (_req, res) => { const { data, error } = await supabase.from('Product').select('*'); if (error) return res.status(500).json({ error: error.message }); res.json({ products: data || [] }); });
+router.post('/', requireAdmin, async (req, res) => { const { data, error } = await supabase.from('Product').insert(req.body).select().single(); if (error) return res.status(400).json({ error: error.message }); res.json({ product: data }); });
+router.put('/:id', requireAdmin, async (req, res) => { const { data, error } = await supabase.from('Product').update(req.body).eq('id', req.params.id).select().single(); if (error) return res.status(400).json({ error: error.message }); res.json({ product: data }); });
+router.delete('/:id', requireAdmin, async (req, res) => { const { error } = await supabase.from('Product').delete().eq('id', req.params.id); if (error) return res.status(400).json({ error: error.message }); res.json({ ok: true }); });
 export default router;
