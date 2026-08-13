@@ -17,17 +17,22 @@ function buildUrl(path: string, query?: Record<string, any>) {
 
 export async function request<T = any>(path: string, opts: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  // Prefer a Supabase Auth session when available. The legacy OTP flow still
-  // falls back to its app JWT until authentication is fully migrated.
+  // The API currently validates the application's JWT (issued by /verify-otp),
+  // not a Supabase Auth access token. Keep the app token first so configuring
+  // Supabase for data access cannot silently turn valid API requests into 401s.
+  const appToken = localStorage.getItem('noir_token');
   const { data: { session } } = supabase
     ? await supabase.auth.getSession()
     : { data: { session: null } };
-  const token = session?.access_token || localStorage.getItem('noir_token');
+  const token = appToken || session?.access_token;
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(buildUrl(path, opts.query), { ...opts, headers });
   if (!res.ok) {
     const text = await res.text();
+    // A token can outlive a redeploy/secret rotation. Remove it immediately
+    // so the next request can recover as an anonymous request or re-login.
+    if (res.status === 401 && appToken) localStorage.removeItem('noir_token');
     throw new Error(text || res.statusText);
   }
   return res.json();

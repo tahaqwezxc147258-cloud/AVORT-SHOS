@@ -2,5 +2,18 @@
   "framework": "vite",
   "functions": {
     "api/[...path].ts": { "maxDuration": 30 }
-  }
+  },
+  "rewrites": [
+    { "source": "/products", "destination": "/api/products" },
+    { "source": "/products/:path*", "destination": "/api/products/:path*" },
+    { "source": "/cart", "destination": "/api/cart" },
+    { "source": "/cart/:path*", "destination": "/api/cart/:path*" },
+    { "source": "/orders", "destination": "/api/orders" },
+    { "source": "/orders/:path*", "destination": "/api/orders/:path*" },
+    { "source": "/payments/:path*", "destination": "/api/payments/:path*" },
+    { "source": "/session/:path*", "destination": "/api/session/:path*" },
+    { "source": "/request-otp", "destination": "/api/request-otp" },
+    { "source": "/verify-otp", "destination": "/api/verify-otp" },
+    { "source": "/api/:path*", "destination": "/api/:path*" }
+  ]
 }
