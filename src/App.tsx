@@ -17,9 +17,12 @@ import { NewsletterFooter } from './components/NewsletterFooter';
 import { ProfileView } from './components/ProfileView';
 import { SeoHead } from './components/SeoHead';
 import { SeoContent } from './components/SeoContent';
+import { SeoPages } from './components/SeoPages';
 
 const MainContent: React.FC = () => {
   const { viewMode, selectedProduct, setSelectedProduct } = useStore();
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const isSeoPage = path !== '/' && path !== '/shop' && path !== '/cart' && path !== '/profile' && path !== '/admin';
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
@@ -28,7 +31,8 @@ const MainContent: React.FC = () => {
         <Header />
 
         <main className="pb-16 md:pb-0">
-          {viewMode === 'home' && (
+          {isSeoPage && <SeoPages path={path} />}
+          {viewMode === 'home' && path === '/' && (
             <>
               <HeroSection />
               <CategoryTabs />
@@ -39,7 +43,7 @@ const MainContent: React.FC = () => {
             </>
           )}
 
-          {viewMode === 'shop' && (
+          {viewMode === 'shop' && path === '/shop' && (
             <>
               <ShopView />
               <NewsletterFooter />
