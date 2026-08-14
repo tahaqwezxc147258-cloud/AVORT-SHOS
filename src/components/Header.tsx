@@ -31,8 +31,8 @@ export const Header: React.FC = () => {
             }}
             className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-cyan-400 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-transform">
-              T
+              <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-black text-sm tracking-tighter shadow-lg shadow-slate-900/20 group-hover:scale-105 transition-transform">
+                AV
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-2xl tracking-wider text-slate-900 group-hover:text-cyan-600 transition-colors">
