@@ -39,6 +39,9 @@ export const NewsletterFooter: React.FC = () => {
         </div>
 
         <div className="text-center text-xs text-slate-400 pt-4 border-t border-slate-100">فروشگاه آنلاین کتونی ایوُرت © ۲۰۲۶ - تمامی حقوق محفوظ است.</div>
+        <div className="flex justify-center pt-4">
+          <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5' alt='' style={{ cursor: 'pointer' }} code='w40rZvRfboztUEStJQMazJQw6bzHxHY5' /></a>
+        </div>
       </div>
     </footer>
   );
