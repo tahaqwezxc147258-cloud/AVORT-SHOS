@@ -15,6 +15,13 @@
     { "source": "/request-otp", "destination": "/api/request-otp" },
     { "source": "/verify-otp", "destination": "/api/verify-otp" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" },
+    { "source": "/purchase-rules", "destination": "/index.html" },
+    { "source": "/returns", "destination": "/index.html" },
+    { "source": "/shipping", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/articles", "destination": "/index.html" },
+    { "source": "/articles/:path*", "destination": "/index.html" }
   ]
 }
