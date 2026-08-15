@@ -14,6 +14,7 @@
     { "source": "/session/:path*", "destination": "/api/session/:path*" },
     { "source": "/request-otp", "destination": "/api/request-otp" },
     { "source": "/verify-otp", "destination": "/api/verify-otp" },
-    { "source": "/api/:path*", "destination": "/api/:path*" }
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
