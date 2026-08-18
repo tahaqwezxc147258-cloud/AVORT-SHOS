@@ -34,11 +34,15 @@ export async function request<T = any>(path: string, opts: RequestOptions = {}):
     // so the next request can recover as an anonymous request or re-login.
     if (res.status === 401 && appToken) localStorage.removeItem('noir_token');
     let message = text || res.statusText;
+    let retryAfter: number | undefined;
     try {
       const payload = JSON.parse(text);
       message = payload.error || payload.message || message;
+      retryAfter = payload.retryAfter;
     } catch { /* response was plain text */ }
-    throw new Error(`${res.status} ${message}`);
+    const error = new Error(`${res.status} ${message}`) as Error & { retryAfter?: number };
+    error.retryAfter = retryAfter;
+    throw error;
   }
   return res.json();
 }

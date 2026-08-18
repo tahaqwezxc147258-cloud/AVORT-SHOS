@@ -3,6 +3,8 @@ import { Product, CartItem, User, Order, Category, ViewMode, ShoeColor, OrderSta
 import { INITIAL_PRODUCTS } from '../data/products';
 import api from '../api';
 
+export type OtpResult = { success: boolean; message?: string; retryAfter?: number };
+
 interface StoreContextType {
   products: Product[];
   isProductsLoading: boolean;
@@ -38,8 +40,8 @@ interface StoreContextType {
   toggleWishlist: (productId: string) => void;
   isWishlisted: (productId: string) => boolean;
   
-  requestOtp: (phone: string) => Promise<boolean>;
-  verifyOtp: (phone: string, code: string) => Promise<boolean>;
+  requestOtp: (phone: string) => Promise<OtpResult>;
+  verifyOtp: (phone: string, code: string) => Promise<OtpResult>;
   loginWithPhone: (phone: string, name?: string) => Promise<boolean>;
   updateUserProfile: (updatedFields: Partial<User>) => void;
   logout: () => void;
@@ -278,18 +280,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isWishlisted = (productId: string) => wishlist.includes(productId);
 
-  const requestOtp = async (phone: string) => {
+  const requestOtp = async (phone: string): Promise<OtpResult> => {
     try {
       const res: any = await api.post('/request-otp', { phone });
-      return res && (res.success === undefined ? true : res.success);
+      return { success: Boolean(res?.success), message: res?.message, retryAfter: res?.retryAfter };
     } catch (e) {
-      // Development fallback: the storefront remains testable without the API server.
-      console.warn('OTP API unavailable; using local test OTP.', e);
-      return true;
+      const error = e as Error & { retryAfter?: number };
+      return { success: false, message: error instanceof Error ? error.message.replace(/^\d+\s*/, '') : 'ارسال کد تأیید انجام نشد.', retryAfter: error.retryAfter };
     }
   };
 
-  const verifyOtp = async (phone: string, code: string) => {
+  const verifyOtp = async (phone: string, code: string): Promise<OtpResult> => {
     const normalizedPhone = phone
       .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
       .replace(/[\s-]/g, '');
@@ -299,14 +300,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setToken(res.token);
         setUser(res.user);
         setIsLoginModalOpen(false);
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, message: 'پاسخ ورود معتبر نیست.' };
     } catch (e) {
       // Never create a fake local session in production: it cannot be
       // authorized by the API and causes every protected request to return 401.
       console.error('OTP verification failed:', e);
-      return false;
+      return { success: false, message: e instanceof Error ? e.message.replace(/^\d+\s*/, '') : 'تأیید کد انجام نشد.' };
     }
   };
 

@@ -6,7 +6,7 @@ import { supabase } from '../db.js';
 const router = Router();
 const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number; lastSentAt: number }>();
 const normalizePhone = (value: string) => {
-  const raw = value.replace(/[\s-]/g, '');
+  const raw = value.replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit))).replace(/[\s-]/g, '');
   const phone = raw.startsWith('+98') ? `0${raw.slice(3)}` : raw.startsWith('98') ? `0${raw.slice(2)}` : raw;
   return phone;
 };
