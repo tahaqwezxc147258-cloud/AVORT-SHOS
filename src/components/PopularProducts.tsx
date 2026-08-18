@@ -4,7 +4,7 @@ import { ShoeCard } from './ShoeCard';
 import { Flame } from 'lucide-react';
 
 export const PopularProducts: React.FC = () => {
-  const { products, activeCategory, searchQuery } = useStore();
+  const { products, isProductsLoading, activeCategory, searchQuery } = useStore();
 
   const filteredProducts = products.filter(p => {
     const matchesCategory = activeCategory === 'همه' || p.category === activeCategory || p.brand === activeCategory;
@@ -33,7 +33,11 @@ export const PopularProducts: React.FC = () => {
       </div>
 
       {/* Grid of Shoe Cards */}
-      {filteredProducts.length > 0 ? (
+      {isProductsLoading ? (
+        <div className="bg-white rounded-3xl p-12 text-center border border-cyan-100">
+          <div className="w-8 h-8 mx-auto rounded-full border-4 border-cyan-100 border-t-cyan-500 animate-spin" />
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filteredProducts.map((shoe) => (
             <ShoeCard key={shoe.id} product={shoe} badge={shoe.isSpecialOffer ? 'تخفیف ویژه' : undefined} />

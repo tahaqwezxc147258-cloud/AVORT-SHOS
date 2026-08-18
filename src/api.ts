@@ -33,7 +33,12 @@ export async function request<T = any>(path: string, opts: RequestOptions = {}):
     // A token can outlive a redeploy/secret rotation. Remove it immediately
     // so the next request can recover as an anonymous request or re-login.
     if (res.status === 401 && appToken) localStorage.removeItem('noir_token');
-    throw new Error(text || res.statusText);
+    let message = text || res.statusText;
+    try {
+      const payload = JSON.parse(text);
+      message = payload.error || payload.message || message;
+    } catch { /* response was plain text */ }
+    throw new Error(`${res.status} ${message}`);
   }
   return res.json();
 }

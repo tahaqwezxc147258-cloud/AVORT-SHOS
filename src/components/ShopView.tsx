@@ -5,7 +5,7 @@ import { Filter, SlidersHorizontal, Search, RotateCcw, Check } from 'lucide-reac
 import { Brand, Category } from '../types';
 
 export const ShopView: React.FC = () => {
-  const { products, searchQuery, setSearchQuery, activeCategory, setActiveCategory } = useStore();
+  const { products, isProductsLoading, searchQuery, setSearchQuery, activeCategory, setActiveCategory } = useStore();
 
   const [selectedBrand, setSelectedBrand] = useState<string>('همه');
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
@@ -13,6 +13,8 @@ export const ShopView: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState<number>(25000000);
 
   const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
+  const collectionBrand = window.location.pathname === '/collection/jordan' ? 'جردن' :
+    window.location.pathname === '/collection/nike' ? 'نایک' : null;
 
   // Filtering Logic
   let filtered = products.filter(p => {
@@ -20,8 +22,10 @@ export const ShopView: React.FC = () => {
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.nameFa.includes(searchQuery);
     
-    const matchesBrand = selectedBrand === 'همه' || p.brand === selectedBrand;
-    const matchesCategory = activeCategory === 'همه' || p.category === activeCategory;
+    const matchesBrand = collectionBrand
+      ? p.brand === collectionBrand || p.category === collectionBrand
+      : selectedBrand === 'همه' || p.brand === selectedBrand;
+    const matchesCategory = collectionBrand || activeCategory === 'همه' || p.category === activeCategory;
     const matchesSize = selectedSize === null || p.sizes.includes(selectedSize);
     const matchesPrice = p.priceToman <= maxPrice;
 
@@ -180,7 +184,11 @@ export const ShopView: React.FC = () => {
           </div>
 
           {/* Products Grid */}
-          {filtered.length > 0 ? (
+          {isProductsLoading ? (
+            <div className="bg-white rounded-3xl p-12 text-center border border-cyan-100">
+              <div className="w-8 h-8 mx-auto rounded-full border-4 border-cyan-100 border-t-cyan-500 animate-spin" />
+            </div>
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map(product => (
                 <ShoeCard key={product.id} product={product} />

@@ -53,7 +53,7 @@ export const LoginModal: React.FC = () => {
           {otpSent && (
             <div>
               <label className="block text-slate-700 mb-1">کد تستی OTP</label>
-              <input type="text" inputMode="numeric" maxLength={4} value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="1234" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 text-center tracking-[0.5em] font-black text-slate-900" autoFocus />
+          <input type="text" inputMode="numeric" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} placeholder="123456" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 text-center tracking-[0.5em] font-black text-slate-900" autoFocus />
               <p className="text-[11px] text-cyan-600 mt-2 text-center">کد تستی ورود: 1234</p>
             </div>
           )}

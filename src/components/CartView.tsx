@@ -50,9 +50,10 @@ export const CartView: React.FC = () => {
   };
 
   const itemsSubtotal = cart.reduce((sum, item) => sum + (item.product.priceToman * item.quantity), 0);
+  const packagingTotal = cart.reduce((sum, item) => sum + (item.withSpecialBox ? (item.product.specialBoxPrice || 350000) * item.quantity : 0), 0);
   const shippingFee = cart.length === 0 ? 0 : 200000;
   const discountAmount = Math.round((itemsSubtotal * discountPercent) / 100);
-  const finalTotal = itemsSubtotal + shippingFee;
+  const finalTotal = itemsSubtotal + packagingTotal + shippingFee;
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +166,7 @@ export const CartView: React.FC = () => {
                     </h3>
                     <p className="text-xs text-slate-500">{item.product.nameFa}</p>
 
-                    <div className="flex items-center gap-3 text-xs text-slate-600 pt-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 pt-1">
                       <span className="bg-cyan-50 text-cyan-700 px-2.5 py-0.5 rounded-lg font-bold">
                         سایز {item.selectedSize}
                       </span>
@@ -174,6 +175,7 @@ export const CartView: React.FC = () => {
                         <span className="w-3 h-3 rounded-full border border-slate-300" style={{ backgroundColor: item.selectedColor.hex }} />
                         <span>{item.selectedColor.name}</span>
                       </span>
+                      <span className={item.withSpecialBox ? 'bg-amber-50 text-amber-700 px-2 py-0.5 rounded-lg font-bold' : 'text-slate-400'}>{item.withSpecialBox ? 'جعبه خاص + عادی' : 'جعبه عادی'}</span>
                     </div>
                   </div>
 

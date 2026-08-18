@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ShieldAlert, Plus, Trash2, Edit3, Package, DollarSign, ShoppingBag, CheckCircle, Save, Image as ImageIcon } from 'lucide-react';
+import { ShieldAlert, Plus, Trash2, Edit3, Package, DollarSign, ShoppingBag, CheckCircle, Save, Image as ImageIcon, Search, RefreshCw, Clock3 } from 'lucide-react';
 import { Brand, Category, OrderStatus, Product } from '../types';
 
 export const AdminPanel: React.FC = () => {
-  const { user, products, orders, addProduct, updateProduct, deleteProduct, updateOrderStatus, setIsLoginModalOpen } = useStore();
+  const { user, products, orders, addProduct, updateProduct, deleteProduct, updateOrderStatus, refreshOrders, setIsLoginModalOpen } = useStore();
 
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add-product'>('products');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
+  const [orderSort, setOrderSort] = useState<'newest' | 'oldest'>('newest');
+  const [orderError, setOrderError] = useState('');
+  const [isRefreshingOrders, setIsRefreshingOrders] = useState(false);
 
   // New Product Form State
   const [name, setName] = useState('');
@@ -21,6 +26,8 @@ export const AdminPanel: React.FC = () => {
   const [stockCount, setStockCount] = useState<number>(10);
   const [isHeroFeatured, setIsHeroFeatured] = useState(false);
   const [description, setDescription] = useState('طراحی رترو با چرم طبیعی درجه یک و بالشتک Nike Air...');
+  const [specialBoxAvailable, setSpecialBoxAvailable] = useState(false);
+  const [specialBoxPrice, setSpecialBoxPrice] = useState(350000);
 
   const productImageUrls = selectedImageFiles.length > 0
     ? imagePreviews
@@ -152,6 +159,23 @@ export const AdminPanel: React.FC = () => {
   // Permission Guard: rely on server-side role
   const isAdmin = user?.role === 'admin';
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timer = window.setInterval(() => { reloadOrders().catch(() => {}); }, 15000);
+    return () => window.clearInterval(timer);
+  }, [isAdmin]);
+
+  const reloadOrders = async () => {
+    if (!isAdmin) return;
+    setIsRefreshingOrders(true);
+    setOrderError('');
+    try {
+      await refreshOrders();
+    } catch (error) { setOrderError(error instanceof Error ? error.message : 'خطا در دریافت سفارش‌ها'); }
+    finally { setIsRefreshingOrders(false); }
+  };
+
+
   if (!isAdmin) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
@@ -175,6 +199,12 @@ export const AdminPanel: React.FC = () => {
   // Stats calculation
   const totalSales = orders.reduce((sum, o) => o.status !== 'CANCELLED' ? sum + o.totalAmountToman : sum, 0);
   const paidOrdersCount = orders.filter(o => o.status === 'PAID' || o.status === 'SHIPPED' || o.status === 'DELIVERED').length;
+  const successfulOrders = orders.filter(o => ['PAID', 'PREPARING', 'SHIPPED', 'DELIVERED'].includes(o.status));
+  const lowStockCount = products.filter(p => p.stockCount <= 3).length;
+  const visibleOrders = [...orders]
+    .filter(o => orderStatusFilter === 'ALL' || o.status === orderStatusFilter)
+    .filter(o => `${o.customerName} ${o.customerPhone} ${o.id} ${o.trackingCode}`.toLowerCase().includes(orderSearch.toLowerCase()))
+    .sort((a, b) => orderSort === 'newest' ? String(b.createdAt).localeCompare(String(a.createdAt)) : String(a.createdAt).localeCompare(String(b.createdAt)));
 
   const handleAddProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,10 +234,14 @@ export const AdminPanel: React.FC = () => {
       inStock: stockCount > 0,
       stockCount: Number(stockCount),
       description,
+      specialBoxAvailable,
+      specialBoxPrice,
       isHeroFeatured
       });
-    } catch {
-      alert('ذخیره محصول انجام نشد. اتصال سرور و دیتابیس را بررسی کنید.');
+    } catch (error) {
+      console.error('Product creation failed:', error);
+      const detail = error instanceof Error ? error.message : 'خطای ناشناخته';
+      alert(`ذخیره محصول انجام نشد: ${detail}`);
       return;
     }
 
@@ -360,6 +394,8 @@ export const AdminPanel: React.FC = () => {
                       />
                     </td>
 
+                    <td className="p-3 min-w-[150px]"><label className="flex items-center gap-2 text-[10px] font-bold"><input type="checkbox" checked={Boolean(p.specialBoxAvailable)} onChange={e => updateProduct(p.id, { specialBoxAvailable: e.target.checked, specialBoxPrice: p.specialBoxPrice || 350000 })} className="accent-amber-500" /> جعبه خاص</label><input type="number" value={p.specialBoxPrice || 350000} onChange={e => updateProduct(p.id, { specialBoxPrice: Number(e.target.value) })} className="mt-2 w-28 rounded-lg border border-slate-200 px-2 py-1 text-[10px]" /></td>
+
                     {/* Sizes Toggle Column */}
                     <td className="p-3 max-w-[220px]">
                       <div className="flex flex-wrap gap-1">
@@ -505,10 +541,17 @@ export const AdminPanel: React.FC = () => {
       {/* TAB 2: Order Management */}
       {activeTab === 'orders' && (
         <div className="bg-white rounded-3xl p-6 border border-cyan-100 shadow-sm space-y-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="rounded-2xl bg-slate-900 p-4 text-white"><span className="text-xs text-slate-300">فروش موفق</span><strong className="mt-2 block text-lg">{successfulOrders.reduce((s, o) => s + o.totalAmountToman, 0).toLocaleString('fa-IR')} تومان</strong></div>
+            <div className="rounded-2xl bg-amber-50 p-4 text-amber-900"><span className="text-xs">در انتظار پرداخت</span><strong className="mt-2 block text-lg">{orders.filter(o => o.status === 'PENDING_PAYMENT').length} سفارش</strong></div>
+            <div className="rounded-2xl bg-cyan-50 p-4 text-cyan-900"><span className="text-xs">آماده‌سازی</span><strong className="mt-2 block text-lg">{orders.filter(o => o.status === 'PREPARING').length} سفارش</strong></div>
+            <div className="rounded-2xl bg-rose-50 p-4 text-rose-900"><span className="text-xs">موجودی کم</span><strong className="mt-2 block text-lg">{lowStockCount} محصول</strong></div>
+          </div>
+          <div className="flex flex-wrap gap-2"><div className="relative flex-1 min-w-[220px]"><Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" /><input value={orderSearch} onChange={e => setOrderSearch(e.target.value)} placeholder="جست‌وجوی نام، تلفن یا کد..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-9 pl-3 text-xs" /></div><select value={orderStatusFilter} onChange={e => setOrderStatusFilter(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold"><option value="ALL">همه وضعیت‌ها</option><option value="PENDING_PAYMENT">در انتظار پرداخت</option><option value="PAID">پرداخت موفق</option><option value="PREPARING">در حال آماده‌سازی</option><option value="SHIPPED">ارسال‌شده</option><option value="DELIVERED">تحویل‌شده</option><option value="CANCELLED">لغوشده</option></select><button onClick={() => reloadOrders().catch(() => {})} className="flex items-center gap-2 rounded-xl bg-cyan-50 px-3 py-2 text-xs font-black text-cyan-700"><RefreshCw className="h-4 w-4" />بروزرسانی</button></div>
           <h2 className="font-extrabold text-slate-900 text-base">مدیریت سفارشات خریداران</h2>
 
           <div className="space-y-4">
-            {orders.map((o) => (
+            {visibleOrders.map((o) => (
               <div key={o.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
                   <div>
@@ -533,7 +576,18 @@ export const AdminPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="text-slate-600 font-bold">آدرس تحویل: {o.shippingAddress}</div>
+                <div className="text-slate-600 font-bold">آدرس تحویل: {o.city || '—'}، {o.shippingAddress} · کدپستی: {o.postalCode || '—'}</div>
+                <div className="space-y-2 border-t border-slate-200 pt-3">
+                  {(o.items || []).map((item, index) => (
+                    <div key={`${o.id}-${item.productId}-${index}`} className="flex flex-wrap items-center gap-3 rounded-xl bg-white p-2 border border-slate-100">
+                      <img src={item.productImage} alt="" className="h-14 w-14 rounded-lg bg-slate-50 object-contain" />
+                      <div className="min-w-[150px] flex-1"><p className="font-black text-slate-900">{item.productName}</p><p className="text-[10px] text-slate-500">{item.productNameEn || ''} · برند: {item.brand || '—'}</p></div>
+                      <span className="rounded-lg bg-slate-100 px-2 py-1 font-black">سایز {item.size}</span>
+                      <span className="flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 font-black"><i className="h-3 w-3 rounded-full border border-slate-300" style={{ backgroundColor: item.colorHex || '#cbd5e1' }} />{item.colorName}</span>
+                      <span className="font-black">×{item.quantity}</span><span className="font-black text-cyan-700">{(item.priceToman * item.quantity).toLocaleString('fa-IR')} تومان</span>
+                    </div>
+                  ))}
+                </div>
 
                 <div className="flex justify-between items-center pt-1 font-black text-sm text-slate-900">
                   <span>مبلغ فاکتور: {o.totalAmountToman.toLocaleString('fa-IR')} تومان</span>
@@ -655,6 +709,12 @@ export const AdminPanel: React.FC = () => {
                 className="w-5 h-5 accent-cyan-500 cursor-pointer"
               />
             </label>
+
+            <label className="sm:col-span-2 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 cursor-pointer">
+              <div><span className="block text-slate-900 font-extrabold">امکان ارسال با جعبه خاص</span><span className="block mt-1 text-[11px] text-slate-600">جعبه خاص به همراه جعبه عادی ارسال می‌شود.</span></div>
+              <input type="checkbox" checked={specialBoxAvailable} onChange={e => setSpecialBoxAvailable(e.target.checked)} className="w-5 h-5 accent-amber-500" />
+            </label>
+            <div><label className="block text-slate-700 mb-1">هزینه جعبه خاص (تومان)</label><input type="number" value={specialBoxPrice} onChange={e => setSpecialBoxPrice(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900" /></div>
 
             <div>
               <label className="block text-slate-700 mb-1">تعداد موجودی اولیه</label>

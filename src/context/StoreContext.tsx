@@ -5,6 +5,7 @@ import api from '../api';
 
 interface StoreContextType {
   products: Product[];
+  isProductsLoading: boolean;
   cart: CartItem[];
   wishlist: string[];
   user: User | null;
@@ -21,6 +22,7 @@ interface StoreContextType {
   
   // Actions
   setViewMode: (mode: ViewMode) => void;
+  openBrandCollection: (brand: 'Ø¬Ø±Ø¯Ù†' | 'Ù†Ø§ÛŒÚ©') => void;
   setActiveCategory: (cat: Category) => void;
   setSearchQuery: (query: string) => void;
   setSelectedProduct: (p: Product | null) => void;
@@ -28,7 +30,7 @@ interface StoreContextType {
   setIsProfileModalOpen: (open: boolean) => void;
   setIsZarinpalModalOpen: (open: boolean) => void;
   
-  addToCart: (product: Product, size: number, color: ShoeColor, quantity?: number) => Promise<void> | void;
+  addToCart: (product: Product, size: number, color: ShoeColor, quantity?: number, withSpecialBox?: boolean) => Promise<void> | void;
   removeFromCart: (productId: string, size: number, colorName: string) => Promise<void> | void;
   updateCartQuantity: (productId: string, size: number, colorName: string, delta: number) => Promise<void> | void;
   clearCart: () => Promise<void> | void;
@@ -50,6 +52,7 @@ interface StoreContextType {
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  refreshOrders: () => Promise<void>;
   updateProfile: (updates: Pick<User, 'fullName' | 'avatar'>) => Promise<void>;
   saveAddress: (address: Omit<Address, 'id'> & { id?: string }) => Promise<void>;
   removeAddress: (addressId: string) => Promise<void>;
@@ -57,8 +60,33 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+const getPathFromViewMode = (mode: ViewMode) => {
+  switch (mode) {
+    case 'shop': return '/shop';
+    case 'cart': return '/cart';
+    case 'profile': return '/profile';
+    case 'admin': return '/admin';
+    case 'home':
+    default: return '/';
+  }
+};
+
+const getViewModeFromPath = (path: string): ViewMode => {
+  const normalized = path.replace(/\/$/, '') || '/';
+
+  switch (normalized) {
+    case '/shop': return 'shop';
+    case '/cart': return 'cart';
+    case '/profile': return 'profile';
+    case '/admin': return 'admin';
+    case '/':
+    default: return 'home';
+  }
+};
+
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('noir_token'));
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('noir_user');
@@ -75,7 +103,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [orders, setOrders] = useState<Order[]>([]);
 
-  const [viewMode, setViewMode] = useState<ViewMode>('home');
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => getViewModeFromPath(window.location.pathname));
   const [activeCategory, setActiveCategory] = useState<Category>('همه');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -91,10 +119,51 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     else localStorage.removeItem('noir_token');
   }, [token]);
 
+  const refreshOrders = async () => {
+    if (!token) return;
+    const res: any = await api.get('/orders');
+    setOrders(res.orders || []);
+  };
+
   useEffect(() => {
     if (user) localStorage.setItem('noir_user', JSON.stringify(user));
     else localStorage.removeItem('noir_user');
   }, [user]);
+
+  useEffect(() => {
+    const syncViewModeFromLocation = () => {
+      const nextViewMode = getViewModeFromPath(window.location.pathname);
+      setViewModeState(prev => (prev === nextViewMode ? prev : nextViewMode));
+    };
+
+    syncViewModeFromLocation();
+    window.addEventListener('popstate', syncViewModeFromLocation);
+
+    return () => window.removeEventListener('popstate', syncViewModeFromLocation);
+  }, []);
+
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    const nextPath = getPathFromViewMode(mode);
+    const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+
+    if (currentPath !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
+  const openBrandCollection = (brand: 'Ø¬Ø±Ø¯Ù†' | 'Ù†Ø§ÛŒÚ©') => {
+    const slug = brand === 'Ø¬Ø±Ø¯Ù†' ? 'jordan' : 'nike';
+    setActiveCategory(brand);
+    setSearchQuery('');
+    setViewModeState('shop');
+    const nextPath = `/collection/${slug}`;
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
 
   // fetch products on mount
   useEffect(() => {
@@ -106,6 +175,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       })
       .catch(() => {
         setProducts(INITIAL_PRODUCTS);
+      })
+      .finally(() => {
+        if (mounted) setIsProductsLoading(false);
       });
     return () => { mounted = false; };
   }, []);
@@ -122,14 +194,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [token]);
 
   // Actions
-  const addToCart = async (product: Product, size: number, color: ShoeColor, quantity = 1) => {
+  const addToCart = async (product: Product, size: number, color: ShoeColor, quantity = 1, withSpecialBox = false) => {
+    const specialBoxPrice = withSpecialBox && product.specialBoxAvailable ? (product.specialBoxPrice || 350000) : 0;
     if (token) {
       try {
-        const res = await api.post('/cart', { productId: product.id, quantity, selectedSize: size, colorName: color.name });
+        const res = await api.post('/cart', { productId: product.id, quantity, selectedSize: size, colorName: color.name, withSpecialBox });
         setCart(res.items || []);
       } catch {
         // fallback to client-side
-        setCart(prev => [...prev, { product, selectedSize: size, selectedColor: color, quantity }]);
+        setCart(prev => [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }]);
       }
     } else {
       setCart(prev => {
@@ -141,7 +214,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           updated[existingIndex].quantity += quantity;
           return updated;
         } else {
-          return [...prev, { product, selectedSize: size, selectedColor: color, quantity }];
+          return [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }];
         }
       });
     }
@@ -230,20 +303,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       return false;
     } catch (e) {
-      // Test-only local sign-in when the optional backend is not running.
-      if (code !== '1234') return false;
-      const localUser: User = {
-        id: `local-${normalizedPhone}`,
-        phone: normalizedPhone,
-        fullName: '',
-        avatar: '',
-        addresses: [],
-        role: normalizedPhone === '09166748552' ? 'admin' : 'user'
-      };
-      setToken(`local-test-token-${normalizedPhone}`);
-      setUser(localUser);
-      setIsLoginModalOpen(false);
-      return true;
+      // Never create a fake local session in production: it cannot be
+      // authorized by the API and causes every protected request to return 401.
+      console.error('OTP verification failed:', e);
+      return false;
     }
   };
 
@@ -257,10 +320,34 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const initiateCheckout = async (receiverName: string, phone: string, city: string, address: string, postalCode: string): Promise<Order | null> => {
     if (cart.length === 0) return null;
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.product.priceToman * item.quantity), 0);
+      const subtotal = cart.reduce((sum, item) => sum + ((item.product.priceToman + (item.withSpecialBox ? (item.product.specialBoxPrice || 350000) : 0)) * item.quantity), 0);
     const shippingFee = subtotal >= 10000000 ? 0 : 85000;
 
-    // If logged in, create order server-side from cart and initiate payment
+    // Create every order on the server so the admin CRM can see member and guest orders.
+    try {
+      const orderRes: any = await api.post('/orders', {
+        receiverName, phone, city, address, postalCode,
+        items: token ? undefined : cart.map(item => ({
+          product: item.product,
+          selectedSize: item.selectedSize,
+          selectedColor: item.selectedColor,
+          withSpecialBox: item.withSpecialBox,
+          quantity: item.quantity,
+        })),
+      });
+      const order = orderRes.order || orderRes;
+      if (token) {
+        const payRes: any = await api.post('/payments/create', { orderId: order.id });
+        if (!payRes || payRes.orderId !== order.id) throw new Error('Payment session could not be created');
+      }
+      setPendingOrder(order);
+      setIsZarinpalModalOpen(true);
+      return order;
+    } catch (e) {
+      console.error('Checkout error:', e);
+    }
+
+    /* Legacy local fallback for offline/demo mode. */
     if (token) {
       try {
         // create order on server (server uses server-side cart)
@@ -285,6 +372,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       userId: user?.id || 'guest',
       customerName: receiverName,
       customerPhone: phone,
+      city,
+      postalCode,
       shippingAddress: `${city}، ${address} (کدپستی: ${postalCode})`,
       items: cart.map(item => ({
         productId: item.product.id,
@@ -338,6 +427,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Fallback: local-only mode (guest flow)
     if (success) {
+      if (!token && pendingOrder.trackingCode) {
+        try {
+          await api.post(`/orders/${pendingOrder.id}/confirm`, { trackingCode: pendingOrder.trackingCode });
+        } catch (error) {
+          console.error('Guest order confirmation failed:', error);
+        }
+      }
       const paidOrder: Order = {
         ...pendingOrder,
         status: 'PAID'
@@ -449,6 +545,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <StoreContext.Provider
       value={{
         products,
+        isProductsLoading,
         cart,
         wishlist,
         user,
@@ -462,6 +559,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isZarinpalModalOpen,
         pendingOrder,
         setViewMode,
+        openBrandCollection,
         setActiveCategory,
         setSearchQuery,
         setSelectedProduct,
@@ -485,6 +583,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateProduct,
         deleteProduct,
         updateOrderStatus
+        ,refreshOrders
         ,updateProfile
         ,saveAddress
         ,removeAddress

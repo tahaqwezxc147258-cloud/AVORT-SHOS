@@ -9,7 +9,7 @@ interface ProductDetailModalProps {
 }
 
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClose }) => {
-  const { toggleWishlist, isWishlisted, addToCart } = useStore();
+  const { toggleWishlist, isWishlisted, addToCart, setViewMode } = useStore();
   const wishlisted = isWishlisted(product.id);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -18,6 +18,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
   const [quantity, setQuantity] = useState<number>(1);
   const [addedAnimation, setAddedAnimation] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [withSpecialBox, setWithSpecialBox] = useState(false);
 
   const handleNextImage = () => {
     setActiveImageIndex((prev) => (prev + 1) % product.images.length);
@@ -28,7 +29,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
   };
 
   const handleAddToCart = () => {
-    addToCart(product, selectedSize, selectedColor, quantity);
+    addToCart(product, selectedSize, selectedColor, quantity, withSpecialBox);
     setAddedAnimation(true);
     setTimeout(() => {
       setAddedAnimation(false);
@@ -229,6 +230,21 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                 );
               })}
             </div>
+          </div>
+
+          {product.specialBoxAvailable && (
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+              <label className="flex items-center justify-between gap-3 cursor-pointer">
+                <span><span className="block font-black text-slate-900 text-sm">ارسال با جعبه خاص</span><span className="block text-xs text-slate-600 mt-1">جعبه خاص به همراه جعبه عادی ارسال می‌شود.</span></span>
+                <input type="checkbox" checked={withSpecialBox} onChange={e => setWithSpecialBox(e.target.checked)} className="h-5 w-5 accent-amber-500" />
+              </label>
+              <p className="text-xs font-bold text-amber-700">+{(product.specialBoxPrice || 350000).toLocaleString('fa-IR')} تومان برای هر جفت</p>
+            </div>
+          )}
+
+          <div className="rounded-3xl border border-cyan-100 bg-white p-4 flex items-center gap-4">
+            <img src="/images/shoe-size-guide.svg" alt="راهنمای اندازه‌گیری طول پا برای انتخاب سایز کفش" className="h-20 w-24 rounded-xl object-cover" />
+            <div className="flex-1"><h3 className="font-black text-sm text-slate-900">چطور سایز پای خود را اندازه بگیریم؟</h3><p className="mt-1 text-xs leading-6 text-slate-500">پا را روی کاغذ بگذارید و فاصله پاشنه تا بلندترین انگشت را اندازه بگیرید.</p><button onClick={() => { onClose(); setViewMode('home'); window.history.pushState({}, '', '/articles/shoe-size-guide'); window.dispatchEvent(new PopStateEvent('popstate')); }} className="mt-2 text-xs font-black text-cyan-600">مشاهده راهنمای کامل سایز ←</button></div>
           </div>
 
           {/* Quantity Selector Bar */}

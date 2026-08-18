@@ -22,14 +22,20 @@ VITE_API_URL=/api
 VITE_SITE_URL=https://YOUR-DOMAIN.vercel.app
 DATABASE_URL=your-supabase-postgres-connection-string
 JWT_SECRET=a-long-random-secret
-ADMIN_PHONE=your-admin-phone
-TEST_OTP=your-temporary-login-code
+ADMIN_PHONE=09166748552
+SMSIR_API_KEY=server-only-smsir-key
+SMSIR_TEMPLATE_ID=8143728
+SMSIR_BASE_URL=https://api.sms.ir/v1
+OTP_EXPIRES_SECONDS=120
+OTP_MAX_ATTEMPTS=5
+OTP_RATE_LIMIT_SECONDS=60
+TEST_OTP=
 NODE_ENV=production
 FRONTEND_URL=https://YOUR-DOMAIN.vercel.app
 ZARINPAL_MERCHANT_ID=your-zarinpal-merchant-id
 ZARINPAL_CALLBACK_URL=https://YOUR-DOMAIN.vercel.app/api/payments/callback
 ```
 
-`TEST_OTP` is only a temporary login mechanism. Before public launch, replace it with a real SMS provider and remove the test-code flow. Payment routes are currently in test mode; configure and implement ZarinPal request/verify before accepting real payments.
+OTP is sent through sms.ir using the server-only API key and template ID. Do not prefix these secrets with `VITE_`, and leave `TEST_OTP` empty in production. Rotate the API key after the key was exposed in chat. Payment routes are currently in test mode; configure and implement ZarinPal request/verify before accepting real payments.
 
 The Vercel function is exposed at `/api/*`, and the frontend build is the normal Vite build.

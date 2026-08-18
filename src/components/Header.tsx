@@ -13,7 +13,8 @@ export const Header: React.FC = () => {
     setIsLoginModalOpen,
     searchQuery,
     setSearchQuery,
-    setActiveCategory
+    setActiveCategory,
+    openBrandCollection
   } = useStore();
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -69,14 +70,14 @@ export const Header: React.FC = () => {
             </button>
 
             <button
-              onClick={() => { setViewMode('shop'); setActiveCategory('جردن'); }}
+              onClick={() => openBrandCollection('جردن')}
               className="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all"
             >
               کالکشن جردن
             </button>
 
             <button
-              onClick={() => { setViewMode('shop'); setActiveCategory('نایک'); }}
+              onClick={() => openBrandCollection('نایک')}
               className="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all"
             >
               کتانی‌های نایک

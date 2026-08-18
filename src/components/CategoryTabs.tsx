@@ -51,7 +51,11 @@ export const CategoryTabs: React.FC = () => {
           return (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => {
+                setActiveCategory(cat);
+                setSearchQuery('');
+                setViewMode('shop');
+              }}
               className={`px-5 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 ${
                 isActive
                   ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10 scale-105'

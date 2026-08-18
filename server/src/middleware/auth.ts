@@ -33,3 +33,11 @@ export function requireUser(req: Request, res: Response, next: NextFunction) {
   (req as any).user = decoded;
   next();
 }
+
+export function optionalUser(req: Request, _res: Response, next: NextFunction) {
+  const auth = req.headers.authorization;
+  if (auth && process.env.JWT_SECRET) {
+    try { (req as any).user = jwt.verify(auth.replace(/^Bearer\s+/, ''), process.env.JWT_SECRET) as jwt.JwtPayload; } catch { /* anonymous guest */ }
+  }
+  next();
+}

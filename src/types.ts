@@ -29,6 +29,8 @@ export interface Product {
   isSpecialOffer?: boolean;
   isHeroFeatured?: boolean;
   resellPriceRange?: string;
+  specialBoxAvailable?: boolean;
+  specialBoxPrice?: number;
 }
 
 export interface CartItem {
@@ -36,6 +38,8 @@ export interface CartItem {
   selectedSize: number;
   selectedColor: ShoeColor;
   quantity: number;
+  withSpecialBox?: boolean;
+  specialBoxPrice?: number;
 }
 
 export interface Address {
@@ -63,9 +67,15 @@ export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PREPARING' | 'SHIPPED' |
 export interface OrderItem {
   productId: string;
   productName: string;
+  productNameEn?: string;
+  brand?: string;
   productImage: string;
   size: number;
   colorName: string;
+  colorHex?: string;
+  withSpecialBox?: boolean;
+  specialBoxPrice?: number;
+  packagingLabel?: string;
   priceToman: number;
   quantity: number;
 }
@@ -73,9 +83,11 @@ export interface OrderItem {
 export interface Order {
   id: string;
   trackingCode: string;
-  userId: string;
+  userId: string | null;
   customerName: string;
   customerPhone: string;
+  city?: string;
+  postalCode?: string;
   shippingAddress: string;
   items: OrderItem[];
   totalAmountToman: number;
