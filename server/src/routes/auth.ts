@@ -26,7 +26,7 @@ router.post('/request-otp', async (req, res) => {
   try {
     const response = await fetch(`${process.env.SMSIR_BASE_URL || 'https://api.sms.ir/v1'}/send/verify`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
-      body: JSON.stringify({ mobile: phone, templateId, parameters: [{ name: 'Code', value: code }] })
+      body: JSON.stringify({ mobile: phone, templateId, parameters: [{ name: 'OTP', value: code }] })
     });
     if (!response.ok) {
       const providerError = await response.text();
