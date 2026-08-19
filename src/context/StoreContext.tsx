@@ -337,7 +337,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })),
       });
       const order = orderRes.order || orderRes;
-      if (token) {
+      if (true) {
         const payRes: any = await api.post('/payments/create', { orderId: order.id });
         if (!payRes?.paymentUrl || payRes.orderId !== order.id) throw new Error('Payment session could not be created');
         window.location.assign(payRes.paymentUrl);
