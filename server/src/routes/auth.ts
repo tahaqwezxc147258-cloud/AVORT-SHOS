@@ -26,9 +26,13 @@ router.post('/request-otp', async (req, res) => {
   try {
     const response = await fetch(`${process.env.SMSIR_BASE_URL || 'https://api.sms.ir/v1'}/send/verify`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
-      body: JSON.stringify({ mobile: `98${phone.slice(1)}`, templateId, parameters: [{ name: 'Code', value: code }] })
+      body: JSON.stringify({ mobile: phone, templateId, parameters: [{ name: 'Code', value: code }] })
     });
-    if (!response.ok) return res.status(502).json({ error: 'ارسال پیامک انجام نشد' });
+    if (!response.ok) {
+      const providerError = await response.text();
+      console.error('SMS.ir rejected OTP request', { status: response.status, body: providerError.slice(0, 1000), templateId });
+      return res.status(502).json({ error: 'ارسال پیامک انجام نشد' });
+    }
     otpStore.set(phone, { code, expiresAt: now + Number(process.env.OTP_EXPIRES_SECONDS || 120) * 1000, attempts: 0, lastSentAt: now });
     return res.json({ success: true });
   } catch { return res.status(502).json({ error: 'ارتباط با سرویس پیامک برقرار نشد' }); }
