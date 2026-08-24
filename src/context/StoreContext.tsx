@@ -201,7 +201,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (token) {
       try {
         const res = await api.post('/cart', { productId: product.id, quantity, selectedSize: size, colorName: color.name, withSpecialBox });
-        setCart(res.items || []);
+        const latest: any = await api.get('/cart');
+        setCart(latest.items || []);
       } catch {
         // fallback to client-side
         setCart(prev => [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }]);
@@ -243,8 +244,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         // naive: set quantity by sending quantity delta; backend replaces quantity
         const item = cart.find(entry => entry.product.id === productId && entry.selectedSize === size && entry.selectedColor.name === colorName);
-        const res = await api.post('/cart', { productId, quantity: delta, selectedSize: size, colorName, currentQuantity: item?.quantity });
-        setCart(res.items || []);
+        await api.post('/cart', { productId, quantity: delta, selectedSize: size, colorName, currentQuantity: item?.quantity });
+        const latest: any = await api.get('/cart');
+        setCart(latest.items || []);
         return;
       } catch {
         // fallback
