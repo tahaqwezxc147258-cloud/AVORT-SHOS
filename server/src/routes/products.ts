@@ -8,8 +8,12 @@ router.post('/', requireAdmin, async (req, res) => {
   if (req.body?._action === 'delete') {
     const id = String(req.body?.id || '');
     if (!id) return res.status(400).json({ error: 'Product id is required' });
+    await supabase.from('CartItem').delete().eq('productId', id);
     const { error } = await supabase.from('Product').delete().eq('id', id);
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      if (error.code === '23503') return res.status(409).json({ error: 'این محصول در سفارش‌های ثبت‌شده استفاده شده و برای حفظ سوابق سفارش قابل حذف نیست.' });
+      return res.status(400).json({ error: error.message, code: error.code });
+    }
     return res.json({ ok: true });
   }
   const now = new Date().toISOString();

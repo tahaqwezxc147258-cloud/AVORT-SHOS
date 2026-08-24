@@ -97,6 +97,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const productUpdateTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const pendingProductUpdates = useRef<Record<string, Partial<Product>>>({});
 
   const [wishlist, setWishlist] = useState<string[]>(() => {
     const saved = localStorage.getItem('noir_wishlist');
@@ -484,12 +485,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateProduct = async (id: string, updatedFields: Partial<Product>) => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updatedFields } : p));
+    pendingProductUpdates.current[id] = { ...(pendingProductUpdates.current[id] || {}), ...updatedFields };
     if (productUpdateTimers.current[id]) clearTimeout(productUpdateTimers.current[id]);
     productUpdateTimers.current[id] = setTimeout(async () => {
+      const fields = pendingProductUpdates.current[id];
+      delete pendingProductUpdates.current[id];
       try {
-        await api.put(`/products/${id}`, updatedFields);
+        const res: any = await api.put(`/products/${id}`, fields);
+        const saved = res.product || res;
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, ...saved } : p));
       } catch (error) {
         console.error('Product update failed:', error);
+        const latest: any = await api.get('/products').catch(() => null);
+        if (latest?.products) setProducts(latest.products);
+        alert(`ذخیره تغییرات محصول انجام نشد: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
+      } finally {
+        delete productUpdateTimers.current[id];
       }
     }, 450);
   };
