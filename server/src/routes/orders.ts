@@ -11,7 +11,7 @@ router.post('/', optionalUser, async (req, res) => {
   if (![receiverName, phone, city, address, postalCode].every(value => String(value || '').trim())) return res.status(400).json({ error: 'اطلاعات گیرنده کامل نیست' });
   const userId = (req as any).user?.sub || null;
   let sourceItems: any[] = items;
-  if (userId) {
+  if (userId && !items.length) {
     const { data, error } = await supabase.from('CartItem').select('*, product:Product(*)').eq('userId', userId);
     if (error) return res.status(500).json({ error: error.message });
     sourceItems = data || [];

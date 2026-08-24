@@ -331,7 +331,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const orderRes: any = await api.post('/orders', {
         receiverName, phone, city, address, postalCode,
-        items: token ? undefined : cart.map(item => ({
+        items: cart.map(item => ({
           product: item.product,
           selectedSize: item.selectedSize,
           selectedColor: item.selectedColor,
