@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { supabase } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
 const router = Router();
-router.get('/', async (_req, res) => { const { data, error } = await supabase.from('Product').select('*').eq('isArchived', false); if (error) return res.status(500).json({ error: error.message }); res.json({ products: data || [] }); });
+router.get('/', async (_req, res) => { let query = supabase.from('Product').select('*').eq('isArchived', false); let result = await query; if (result.error?.code === '42703') result = await supabase.from('Product').select('*'); if (result.error) return res.status(500).json({ error: result.error.message }); res.json({ products: result.data || [] }); });
 router.post('/', requireAdmin, async (req, res) => {
   if (req.body?._action === 'delete') {
     const id = String(req.body?.id || '');
