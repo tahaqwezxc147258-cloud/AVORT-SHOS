@@ -11,6 +11,13 @@ router.post('/', requireAdmin, async (req, res) => {
   if (error) return res.status(400).json({ error: error.message, code: error.code });
   res.json({ product: data });
 });
+router.post('/delete', requireAdmin, async (req, res) => {
+  const id = String(req.body?.id || '');
+  if (!id) return res.status(400).json({ error: 'Product id is required' });
+  const { error } = await supabase.from('Product').delete().eq('id', id);
+  if (error) return res.status(400).json({ error: error.message });
+  res.json({ ok: true });
+});
 router.put('/:id', requireAdmin, async (req, res) => {
   const { id: _id, createdAt: _createdAt, ...fields } = req.body;
   const { data, error } = await supabase.from('Product').update({ ...fields, updatedAt: new Date().toISOString() }).eq('id', req.params.id).select().single();
