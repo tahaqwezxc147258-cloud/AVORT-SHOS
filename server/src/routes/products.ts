@@ -5,6 +5,13 @@ import { requireAdmin } from '../middleware/auth.js';
 const router = Router();
 router.get('/', async (_req, res) => { const { data, error } = await supabase.from('Product').select('*'); if (error) return res.status(500).json({ error: error.message }); res.json({ products: data || [] }); });
 router.post('/', requireAdmin, async (req, res) => {
+  if (req.body?._action === 'delete') {
+    const id = String(req.body?.id || '');
+    if (!id) return res.status(400).json({ error: 'Product id is required' });
+    const { error } = await supabase.from('Product').delete().eq('id', id);
+    if (error) return res.status(400).json({ error: error.message });
+    return res.json({ ok: true });
+  }
   const now = new Date().toISOString();
   const payload = { ...req.body, id: req.body.id || randomUUID(), createdAt: now, updatedAt: now };
   const { data, error } = await supabase.from('Product').insert(payload).select().single();

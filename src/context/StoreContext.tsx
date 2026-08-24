@@ -495,7 +495,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteProduct = async (id: string) => {
-    await api.post('/products/delete', { id });
+    await api.post('/products', { _action: 'delete', id });
     setProducts(prev => prev.filter(p => p.id !== id));
   };
 
