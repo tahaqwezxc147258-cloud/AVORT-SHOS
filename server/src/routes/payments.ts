@@ -9,7 +9,10 @@ async function zarinpal(url: string, body: Record<string, unknown>) {
   if (!merchantId) throw new Error('ZARINPAL_MERCHANT_ID is not configured');
   const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ merchant_id: merchantId, ...body }) });
   const data = await response.json() as any;
-  if (!response.ok || (!data.data?.authority && data.data?.code !== 100 && data.data?.code !== 101)) throw new Error(data.errors?.[0]?.message || 'ZarinPal request failed');
+  if (!response.ok || Number(data.data?.code) !== 100 || !data.data?.authority) {
+    const errorMessage = data.errors?.[0]?.message || data.data?.message || `ZarinPal request failed (${data.data?.code || response.status})`;
+    throw new Error(errorMessage);
+  }
   return data.data;
 }
 router.post('/create', optionalUser, async (req, res) => { try {
@@ -23,7 +26,7 @@ router.post('/create', optionalUser, async (req, res) => { try {
   const callback = new URL(callbackUrl); callback.searchParams.set('orderId', order.id);
   const payment = await zarinpal(requestUrl, { amount: Number(order.totalAmountToman) * 10, description: `پرداخت سفارش ${order.trackingCode}`, callback_url: callback.toString(), mobile: order.customerPhone });
   res.json({ mode: 'live', orderId: order.id, authority: payment.authority, paymentUrl: `https://payment.zarinpal.com/pg/StartPay/${payment.authority}` });
-} catch (error) { console.error('ZarinPal create payment failed', error); res.status(502).json({ error: 'Unable to create payment with ZarinPal' }); } });
+} catch (error) { console.error('ZarinPal create payment failed', error); res.status(502).json({ error: error instanceof Error ? error.message : 'Unable to create payment with ZarinPal' }); } });
 router.get('/callback', async (req, res) => { const orderId = String(req.query.orderId || ''); const authority = String(req.query.Authority || '');
   try { if (String(req.query.Status || '') !== 'OK' || !orderId || !authority) throw new Error('Payment was cancelled');
     const { data: order, error } = await supabase.from('Order').select('*').eq('id', orderId).single(); if (error || !order) throw new Error('Order not found');
