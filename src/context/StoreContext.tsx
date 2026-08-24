@@ -50,9 +50,9 @@ interface StoreContextType {
   completeZarinpalPayment: (orderId: string, success: boolean) => Promise<boolean>;
   
   // Admin actions
-  addProduct: (p: Omit<Product, 'id'>) => void;
+  addProduct: (p: Omit<Product, 'id'>) => Promise<Product>;
   updateProduct: (id: string, p: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  deleteProduct: (id: string) => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   refreshOrders: () => Promise<void>;
   updateProfile: (updates: Pick<User, 'fullName' | 'avatar'>) => Promise<void>;
@@ -474,9 +474,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Admin Actions
   const addProduct = async (p: Omit<Product, 'id'>) => {
     const res: any = await api.post('/products', p);
-    const list: any = await api.get('/products');
-    setProducts(list.products || []);
-    return res.product || res;
+    const created = res.product || res;
+    setProducts(prev => [...prev, created]);
+    return created as Product;
   };
 
   const updateProduct = async (id: string, updatedFields: Partial<Product>) => {
@@ -492,13 +492,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteProduct = async (id: string) => {
-    try {
-      await api.del(`/products/${id}`);
-      const list: any = await api.get('/products');
-      setProducts(list.products || []);
-    } catch (e) {
-      setProducts(prev => prev.filter(p => p.id !== id));
-    }
+    await api.del(`/products/${id}`);
+    setProducts(prev => prev.filter(p => p.id !== id));
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {

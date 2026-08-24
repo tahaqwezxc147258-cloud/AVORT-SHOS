@@ -19,7 +19,7 @@ Add these variables to the Vercel project for **Production**, **Preview**, and *
 
 ```text
 VITE_API_URL=/api
-VITE_SITE_URL=https://YOUR-DOMAIN.vercel.app
+VITE_SITE_URL=https://avort.ir
 DATABASE_URL=your-supabase-postgres-connection-string
 JWT_SECRET=a-long-random-secret
 ADMIN_PHONE=09166748552
@@ -31,9 +31,9 @@ OTP_MAX_ATTEMPTS=5
 OTP_RATE_LIMIT_SECONDS=60
 TEST_OTP=
 NODE_ENV=production
-FRONTEND_URL=https://YOUR-DOMAIN.vercel.app
+FRONTEND_URL=https://avort.ir
 ZARINPAL_MERCHANT_ID=your-zarinpal-merchant-id
-ZARINPAL_CALLBACK_URL=https://YOUR-DOMAIN.vercel.app/api/payments/callback
+ZARINPAL_CALLBACK_URL=https://pay.avort.ir/api/payments/callback
 ```
 
 OTP is sent through sms.ir using the server-only API key and template ID. Do not prefix these secrets with `VITE_`, and leave `TEST_OTP` empty in production. Rotate the API key after the key was exposed in chat. Payment routes are currently in test mode; configure and implement ZarinPal request/verify before accepting real payments.

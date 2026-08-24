@@ -521,7 +521,11 @@ export const AdminPanel: React.FC = () => {
                       <button
                         onClick={() => {
                           if (confirm(`آیا از حذف محصول ${p.nameFa} اطمینان دارید؟`)) {
-                            deleteProduct(p.id);
+                            deleteProduct(p.id).catch((error) => {
+                              console.error('Product deletion failed:', error);
+                              const detail = error instanceof Error ? error.message : 'خطای ناشناخته';
+                              alert(`حذف محصول انجام نشد: ${detail}`);
+                            });
                           }
                         }}
                         className="text-rose-500 hover:text-rose-700 p-2 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors"
