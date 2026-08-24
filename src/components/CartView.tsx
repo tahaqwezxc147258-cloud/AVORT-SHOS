@@ -73,7 +73,7 @@ export const CartView: React.FC = () => {
       return;
     }
 
-    if (!user && false) {
+    if (false) {
       setIsLoginModalOpen(true);
       alert('برای ادامه‌ی پرداخت لطفاً وارد حساب کاربری شوید.');
       return;

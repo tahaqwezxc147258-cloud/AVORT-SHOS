@@ -2,11 +2,10 @@ import { Router } from 'express';
 import { supabase } from '../db.js';
 import { optionalUser } from '../middleware/auth.js';
 const router = Router();
-const merchantId = process.env.ZARINPAL_MERCHANT_ID;
-const callbackUrl = process.env.ZARINPAL_CALLBACK_URL;
 const requestUrl = 'https://payment.zarinpal.com/pg/v4/payment/request.json';
 const verifyUrl = 'https://payment.zarinpal.com/pg/v4/payment/verify.json';
 async function zarinpal(url: string, body: Record<string, unknown>) {
+  const merchantId = process.env.ZARINPAL_MERCHANT_ID;
   if (!merchantId) throw new Error('ZARINPAL_MERCHANT_ID is not configured');
   const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ merchant_id: merchantId, ...body }) });
   const data = await response.json() as any;
@@ -14,6 +13,7 @@ async function zarinpal(url: string, body: Record<string, unknown>) {
   return data.data;
 }
 router.post('/create', optionalUser, async (req, res) => { try {
+  const callbackUrl = process.env.ZARINPAL_CALLBACK_URL;
   if (!callbackUrl) return res.status(500).json({ error: 'ZARINPAL_CALLBACK_URL is not configured' });
   let orderQuery = supabase.from('Order').select('*').eq('id', String(req.body.orderId));
   if ((req as any).user?.sub) orderQuery = orderQuery.eq('userId', (req as any).user.sub);

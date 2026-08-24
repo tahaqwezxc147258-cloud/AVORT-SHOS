@@ -348,6 +348,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return order;
     } catch (e) {
       console.error('Checkout error:', e);
+      const message = e instanceof Error ? e.message.replace(/^\d+\s*/, '') : 'خطا در اتصال به درگاه پرداخت';
+      alert(`پرداخت انجام نشد: ${message}`);
     }
 
     /* Legacy local fallback for offline/demo mode. */

@@ -10,10 +10,13 @@ const normalizePhone = (value: string) => {
   const phone = raw.startsWith('+98') ? `0${raw.slice(3)}` : raw.startsWith('98') ? `0${raw.slice(2)}` : raw;
   return phone;
 };
-const isIranMobile = (phone: string) => /^09\d{9}$/.test(phone);
+const normalizeDigits = (value: string) => value
+  .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+  .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
+const isIranMobile = (phone: string) => /^09\d{9}$/.test(normalizeDigits(phone));
 
 router.post('/request-otp', async (req, res) => {
-  const phone = normalizePhone(String(req.body.phone || ''));
+  const phone = normalizePhone(normalizeDigits(String(req.body.phone || '')));
   if (!isIranMobile(phone)) return res.status(400).json({ error: 'شماره موبایل معتبر نیست' });
   const now = Date.now();
   const previous = otpStore.get(phone);
@@ -21,10 +24,11 @@ router.post('/request-otp', async (req, res) => {
   if (previous && now - previous.lastSentAt < rateLimit) return res.status(429).json({ error: 'لطفاً کمی بعد دوباره تلاش کنید' });
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const apiKey = process.env.SMSIR_API_KEY;
-  const templateId = Number(process.env.SMSIR_TEMPLATE_ID || 8143728);
+  const templateId = Number(process.env.SMSIR_TEMPLATE_ID || 8467718);
   if (!apiKey) return res.status(500).json({ error: 'تنظیمات سرویس پیامک کامل نیست' });
   try {
-    const response = await fetch(`${process.env.SMSIR_BASE_URL || 'https://api.sms.ir/v1'}/send/verify`, {
+    const baseUrl = (process.env.SMSIR_BASE_URL || 'https://api.sms.ir/v1').replace(/\/$/, '');
+    const response = await fetch(`${baseUrl}/send/verify`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
       body: JSON.stringify({ mobile: phone, templateId, parameters: [{ name: 'OTP', value: code }] })
     });
@@ -39,7 +43,7 @@ router.post('/request-otp', async (req, res) => {
 });
 
 router.post('/verify-otp', async (req, res) => {
-  const phone = normalizePhone(String(req.body.phone || ''));
+  const phone = normalizePhone(normalizeDigits(String(req.body.phone || '')));
   const code = String(req.body.code || '');
   const entry = otpStore.get(phone);
   const maxAttempts = Number(process.env.OTP_MAX_ATTEMPTS || 5);
