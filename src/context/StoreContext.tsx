@@ -24,7 +24,7 @@ interface StoreContextType {
   
   // Actions
   setViewMode: (mode: ViewMode) => void;
-  openBrandCollection: (brand: 'Ø¬Ø±Ø¯Ù†' | 'Ù†Ø§ÛŒÚ©') => void;
+  openBrandCollection: (brand: 'جردن' | 'نایک') => void;
   setActiveCategory: (cat: Category) => void;
   setSearchQuery: (query: string) => void;
   setSelectedProduct: (p: Product | null) => void;
@@ -156,8 +156,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const openBrandCollection = (brand: 'Ø¬Ø±Ø¯Ù†' | 'Ù†Ø§ÛŒÚ©') => {
-    const slug = brand === 'Ø¬Ø±Ø¯Ù†' ? 'jordan' : 'nike';
+  const openBrandCollection = (brand: 'جردن' | 'نایک') => {
+    const slug = brand === 'جردن' ? 'jordan' : 'nike';
     setActiveCategory(brand);
     setSearchQuery('');
     setViewModeState('shop');
@@ -399,7 +399,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       shippingFeeToman: shippingFee,
       status: 'PENDING_PAYMENT',
       createdAt: new Date().toLocaleDateString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-      paymentMethod: 'زری‌ن‌پال'
+      paymentMethod: 'زرین‌پال'
     };
 
     setPendingOrder(newOrder);
