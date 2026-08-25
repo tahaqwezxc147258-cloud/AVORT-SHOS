@@ -47,7 +47,9 @@ router.post('/', optionalUser, async (req, res) => {
 
 router.get('/', requireUser, async (req, res) => {
   let query = supabase.from('Order').select('*, items:OrderItem(*)').order('createdAt', { ascending: false });
-  if ((req as any).user.role !== 'ADMIN') query = query.eq('userId', (req as any).user.sub);
+  if ((req as any).user.role !== 'ADMIN') {
+    query = query.eq('userId', (req as any).user.sub).neq('status', 'PENDING_PAYMENT');
+  }
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   return res.json({ orders: data || [] });

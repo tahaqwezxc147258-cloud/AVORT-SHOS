@@ -15,6 +15,22 @@ async function zarinpal(url: string, body: Record<string, unknown>) {
   }
   return data.data;
 }
+async function verifyZarinpal(amount: number, authority: string) {
+  const merchantId = process.env.ZARINPAL_MERCHANT_ID;
+  if (!merchantId) throw new Error('ZARINPAL_MERCHANT_ID is not configured');
+  const response = await fetch(verifyUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ merchant_id: merchantId, amount, authority }),
+  });
+  const data = await response.json() as any;
+  const code = Number(data.data?.code);
+  if (!response.ok || ![100, 101].includes(code)) {
+    const errorMessage = data.errors?.[0]?.message || data.data?.message || `ZarinPal verification failed (${data.data?.code || response.status})`;
+    throw new Error(errorMessage);
+  }
+  return data.data;
+}
 router.post('/create', optionalUser, async (req, res) => { try {
   const callbackUrl = process.env.ZARINPAL_CALLBACK_URL;
   if (!callbackUrl) return res.status(500).json({ error: 'ZARINPAL_CALLBACK_URL is not configured' });
@@ -30,7 +46,7 @@ router.post('/create', optionalUser, async (req, res) => { try {
 router.get('/callback', async (req, res) => { const orderId = String(req.query.orderId || ''); const authority = String(req.query.Authority || '');
   try { if (String(req.query.Status || '') !== 'OK' || !orderId || !authority) throw new Error('Payment was cancelled');
     const { data: order, error } = await supabase.from('Order').select('*').eq('id', orderId).single(); if (error || !order) throw new Error('Order not found');
-    const payment = await zarinpal(verifyUrl, { amount: Number(order.totalAmountToman) * 10, authority }); if (![100, 101].includes(Number(payment.code))) throw new Error('Payment verification failed');
+    const payment = await verifyZarinpal(Number(order.totalAmountToman) * 10, authority);
     await supabase.from('Order').update({ status: 'PAID' }).eq('id', orderId).eq('status', 'PENDING_PAYMENT');
     const frontend = process.env.FRONTEND_URL || 'https://avort.ir'; res.redirect(`${frontend}/?payment=success&orderId=${encodeURIComponent(orderId)}&refId=${encodeURIComponent(payment.ref_id || '')}`);
   } catch (error) { console.error('ZarinPal callback failed', error); const frontend = process.env.FRONTEND_URL || 'https://avort.ir'; res.redirect(`${frontend}/?payment=failed&orderId=${encodeURIComponent(orderId)}`); }

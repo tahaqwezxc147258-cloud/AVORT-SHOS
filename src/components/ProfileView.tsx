@@ -6,6 +6,14 @@ import { Address } from '../types';
 import { useStore } from '../context/StoreContext';
 
 type Tab = 'profile' | 'addresses' | 'orders' | 'wishlist';
+const orderStatusLabels: Record<string, string> = {
+  PENDING_PAYMENT: 'در انتظار پرداخت',
+  PAID: 'پرداخت موفق',
+  PREPARING: 'در حال آماده‌سازی',
+  SHIPPED: 'ارسال‌شده',
+  DELIVERED: 'تحویل‌شده',
+  CANCELLED: 'لغوشده',
+};
 type Place = { id: string; name: string; province_id?: string };
 type AddressDraft = Omit<Address, 'id'> & { id?: string };
 
@@ -52,7 +60,7 @@ export const ProfileView: React.FC = () => {
       <main className="rounded-3xl border border-cyan-100 bg-white p-5 sm:p-7 min-h-96">
         {tab === 'profile' && <form onSubmit={async e => { e.preventDefault(); await updateProfile({ fullName: name, avatar: user.avatar }); }} className="max-w-xl space-y-5"><h2 className="text-lg font-black">اطلاعات شخصی</h2><label className="block text-sm font-bold">نام و نام خانوادگی<input required value={name} onChange={e => setName(e.target.value)} placeholder="مثلاً علی رضایی" className={inputClass} /></label><p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500">تصویر پروفایل به‌صورت خودکار از حرف اول نام یا شمارهٔ شما ساخته می‌شود.</p><button className="rounded-xl bg-cyan-500 px-5 py-3 text-white font-bold inline-flex gap-2"><Save className="w-4 h-4" />ذخیرهٔ تغییرات</button></form>}
         {tab === 'addresses' && <div className="space-y-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black">آدرس‌های من</h2><p className="text-xs text-slate-500 mt-1">ابتدا استان و سپس شهر را انتخاب کنید.</p></div><button onClick={() => setAddressDraft(blankAddress())} className="rounded-xl bg-cyan-500 text-white px-4 py-2.5 font-bold text-sm inline-flex items-center gap-1"><Plus className="w-4 h-4" />افزودن آدرس</button></div>{addressDraft && <AddressEditor draft={addressDraft} onSave={async draft => { await saveAddress(draft); setAddressDraft(null); }} onCancel={() => setAddressDraft(null)} />}{user.addresses.length === 0 ? <div className="py-10 text-center text-sm text-slate-500">هنوز آدرسی ثبت نشده است.</div> : <div className="grid gap-3">{user.addresses.map(address => <article key={address.id} className="rounded-2xl border border-slate-100 p-4 flex gap-3 justify-between"><div><div className="font-black">{address.title} {address.isDefault && <span className="text-xs text-cyan-600 mr-2">پیش‌فرض</span>}</div><p className="mt-2 text-sm">{address.receiverName} — {address.city}</p><p className="mt-1 text-xs leading-5 text-slate-500">{address.address}</p></div><div className="flex h-fit gap-3 text-sm"><button onClick={() => setAddressDraft(address)} className="text-cyan-600">ویرایش</button><button onClick={() => removeAddress(address.id)} className="text-rose-500"><Trash2 className="w-4 h-4" /></button></div></article>)}</div>}</div>}
-        {tab === 'orders' && <div className="space-y-3"><h2 className="text-lg font-black">سفارش‌های من</h2>{orders.length ? orders.map(order => <article key={order.id} className="rounded-2xl border border-slate-100 p-4 flex justify-between"><div><b>{order.trackingCode}</b><p className="mt-1 text-xs text-slate-500">{order.createdAt}</p></div><div className="text-left"><b className="text-cyan-600">{order.totalAmountToman.toLocaleString('fa-IR')} تومان</b><p className="mt-1 text-xs">{order.status}</p></div></article>) : <p className="text-sm text-slate-500">هنوز سفارشی ثبت نکرده‌اید.</p>}</div>}
+        {tab === 'orders' && <div className="space-y-3"><h2 className="text-lg font-black">سفارش‌های من</h2>{orders.length ? orders.map(order => <article key={order.id} className="rounded-2xl border border-slate-100 p-4 flex justify-between"><div><b>{order.trackingCode}</b><p className="mt-1 text-xs text-slate-500">{order.createdAt}</p></div><div className="text-left"><b className="text-cyan-600">{order.totalAmountToman.toLocaleString('fa-IR')} تومان</b><p className="mt-1 text-xs">{orderStatusLabels[order.status] || 'نامشخص'}</p></div></article>) : <p className="text-sm text-slate-500">هنوز سفارشی ثبت نکرده‌اید.</p>}</div>}
         {tab === 'wishlist' && <div className="space-y-3"><h2 className="text-lg font-black">علاقه‌مندی‌ها</h2>{wishedProducts.length ? <div className="grid sm:grid-cols-2 gap-3">{wishedProducts.map(product => <button key={product.id} onClick={() => setSelectedProduct(product)} className="rounded-2xl border border-slate-100 p-3 flex gap-3 items-center text-right"><img src={product.images[0]} className="w-14 h-14 object-contain" /><b className="text-sm">{product.name}</b></button>)}</div> : <p className="text-sm text-slate-500">هنوز محصولی به علاقه‌مندی‌ها اضافه نشده است.</p>}</div>}
       </main></div>
   </section>;

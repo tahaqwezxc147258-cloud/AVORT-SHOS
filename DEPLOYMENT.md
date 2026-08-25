@@ -32,7 +32,7 @@ OTP_RATE_LIMIT_SECONDS=60
 TEST_OTP=
 NODE_ENV=production
 FRONTEND_URL=https://avort.ir
-ZARINPAL_MERCHANT_ID=your-zarinpal-merchant-id
+ZARINPAL_MERCHANT_ID=b64b13cf-27f7-4779-b882-eee27a1f06f0
 ZARINPAL_CALLBACK_URL=https://pay.avort.ir/api/payments/callback
 ```
 

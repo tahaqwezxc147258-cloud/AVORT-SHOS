@@ -517,7 +517,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const res: any = await api.get('/orders');
         setOrders(res.orders || []);
       } catch (e) {
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+        console.error('Order status update failed', e);
+        alert(`تغییر وضعیت سفارش انجام نشد: ${e instanceof Error ? e.message : 'خطای ناشناخته'}`);
       }
     })();
   };
