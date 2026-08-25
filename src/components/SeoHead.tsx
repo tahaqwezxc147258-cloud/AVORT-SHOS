@@ -11,8 +11,8 @@ export const SeoHead: React.FC = () => {
   useEffect(() => {
     const path = window.location.pathname.replace(/\/$/, '') || '/';
     const article = path.startsWith('/articles/') ? seoArticles.find(item => item.slug === path.slice(10)) : undefined;
-    const title = article ? `${article.title} | آورت` : defaultTitle;
-    const description = article?.description || defaultDescription;
+    const title = article ? `${article.title} | آورت` : selectedProduct ? `${selectedProduct.nameFa || selectedProduct.name} | خرید از آورت` : defaultTitle;
+    const description = article?.description || selectedProduct?.description || defaultDescription;
     const canonical = siteUrl + path;
     const noindex = ['cart', 'profile', 'admin'].includes(viewMode);
     document.title = title;

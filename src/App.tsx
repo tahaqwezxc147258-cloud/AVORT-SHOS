@@ -23,7 +23,8 @@ const MainContent: React.FC = () => {
   const { viewMode, selectedProduct, setSelectedProduct } = useStore();
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const isBrandCollection = path === '/collection/jordan' || path === '/collection/nike';
-  const isSeoPage = !isBrandCollection && path !== '/' && path !== '/shop' && path !== '/cart' && path !== '/profile' && path !== '/admin';
+  const isProductPage = path.startsWith('/product/');
+  const isSeoPage = !isBrandCollection && !isProductPage && path !== '/' && path !== '/shop' && path !== '/cart' && path !== '/profile' && path !== '/admin';
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">

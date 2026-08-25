@@ -110,6 +110,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeCategory, setActiveCategory] = useState<Category>('همه');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const selectProduct = (product: Product | null) => {
+    setSelectedProduct(product);
+    const current = window.location.pathname;
+    if (product) {
+      const next = `/product/${encodeURIComponent(product.id)}`;
+      if (current !== next) window.history.pushState({}, '', next);
+    } else if (current.startsWith('/product/')) {
+      window.history.pushState({}, '', '/shop');
+    }
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [isZarinpalModalOpen, setIsZarinpalModalOpen] = useState<boolean>(false);
@@ -174,7 +185,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     api.get('/products')
       .then((res: any) => {
         if (!mounted) return;
-        setProducts(res.products || []);
+        const loadedProducts = res.products || [];
+        setProducts(loadedProducts);
+        const match = window.location.pathname.match(/^\/product\/([^/]+)/);
+        if (match) {
+          const product = loadedProducts.find((item: Product) => item.id === decodeURIComponent(match[1]));
+          if (product) setSelectedProduct(product);
+        }
       })
       .catch(() => {
         setProducts(INITIAL_PRODUCTS);
@@ -579,7 +596,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         openBrandCollection,
         setActiveCategory,
         setSearchQuery,
-        setSelectedProduct,
+        setSelectedProduct: selectProduct,
         setIsLoginModalOpen,
         setIsProfileModalOpen,
         setIsZarinpalModalOpen,

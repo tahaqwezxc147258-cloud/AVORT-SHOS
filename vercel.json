@@ -22,6 +22,7 @@
     { "source": "/shipping", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/index.html" },
     { "source": "/articles", "destination": "/index.html" },
-    { "source": "/articles/:path*", "destination": "/index.html" }
+    { "source": "/articles/:path*", "destination": "/index.html" },
+    { "source": "/product/:path*", "destination": "/index.html" }
   ]
 }
