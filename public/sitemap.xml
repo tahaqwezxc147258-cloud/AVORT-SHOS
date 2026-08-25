@@ -9,8 +9,13 @@
   <url><loc>https://avort.ir/returns</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://avort.ir/shipping</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://avort.ir/privacy</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://avort.ir/articles/best-walking-shoes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://avort.ir/articles/shoe-size-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://avort.ir/articles/how-to-identify-original-shoes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://avort.ir/articles/original-vs-fake</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/best-walking-shoes</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/shoe-size-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/how-to-identify-original-shoes</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/original-vs-fake</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/best-mens-sneakers</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/best-womens-sneakers</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/everyday-style-shoes</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/clean-white-shoes</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/shoe-care-guide</loc><priority>0.7</priority></url>
 </urlset>
