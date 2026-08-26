@@ -27,16 +27,13 @@ export const HeroSection: React.FC = () => {
   return (
     <section className="relative overflow-hidden py-8 lg:py-14 px-4 lg:px-8">
       {/* Background Decorative Circles & Watermark */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-cyan-200/30 rounded-full filter blur-3xl pointer-events-none -z-10"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-slate-100/60 rounded-full filter blur-3xl pointer-events-none -z-10"></div>
       
       <div className="max-w-7xl mx-auto">
         {/* Main Hero Card Container matching Image 2 */}
         <div className="bg-white rounded-3xl lg:rounded-[36px] p-6 lg:p-12 shadow-[0_20px_50px_rgba(0,180,216,0.12)] border border-cyan-100/80 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Watermark background text */}
-          <span className="absolute -bottom-8 left-4 text-[100px] lg:text-[180px] font-black text-slate-100/80 select-none pointer-events-none tracking-tighter leading-none dir-ltr">
-            JORDAN
-          </span>
 
           {/* Right Info Column (RTL Start) */}
           <div className="lg:col-span-6 z-10 space-y-4 lg:space-y-6">
@@ -91,7 +88,7 @@ export const HeroSection: React.FC = () => {
             {/* Main Elevated 3D Shoe Floating Canvas */}
             <div className="relative w-full aspect-4/3 max-w-[520px] flex items-center justify-center py-6 [perspective:1000px]">
               {/* Radial Cyan Glow Platform */}
-              <div className="absolute w-72 h-72 sm:w-80 sm:h-80 bg-cyan-200/50 rounded-full filter blur-2xl animate-pulse"></div>
+              <div className="absolute w-72 h-72 sm:w-80 sm:h-80 bg-slate-100/70 rounded-full filter blur-2xl"></div>
               <div className="absolute bottom-6 w-64 h-8 bg-slate-900/10 rounded-full filter blur-md"></div>
 
               {/* Tilted 3D Floating Isolated Shoe Image */}

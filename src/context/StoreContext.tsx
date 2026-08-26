@@ -53,6 +53,7 @@ interface StoreContextType {
   addProduct: (p: Omit<Product, 'id'>) => Promise<Product>;
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   refreshOrders: () => Promise<void>;
   updateProfile: (updates: Pick<User, 'fullName' | 'avatar'>) => Promise<void>;
@@ -527,6 +528,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setProducts(prev => prev.filter(p => p.id !== id));
   };
 
+  const deleteOrder = async (id: string) => {
+    await api.del(`/orders/${id}`);
+    setOrders(prev => prev.filter(order => order.id !== id));
+  };
+
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
     (async () => {
       try {
@@ -616,6 +622,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addProduct,
         updateProduct,
         deleteProduct,
+        deleteOrder,
         updateOrderStatus
         ,refreshOrders
         ,updateProfile

@@ -10,7 +10,7 @@ export const ShopView: React.FC = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>('همه');
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'popular' | 'price-asc' | 'price-desc' | 'rating'>('popular');
-  const [maxPrice, setMaxPrice] = useState<number>(25000000);
+  const [maxPrice, setMaxPrice] = useState<number>(100000000);
 
   const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
   const collectionBrand = window.location.pathname === '/collection/jordan' ? 'جردن' :
@@ -44,7 +44,7 @@ export const ShopView: React.FC = () => {
     setSelectedBrand('همه');
     setActiveCategory('همه');
     setSelectedSize(null);
-    setMaxPrice(25000000);
+    setMaxPrice(100000000);
     setSearchQuery('');
   };
 
@@ -150,7 +150,7 @@ export const ShopView: React.FC = () => {
             <input
               type="range"
               min="5000000"
-              max="25000000"
+              max="100000000"
               step="500000"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}

@@ -3,7 +3,18 @@ import { supabase } from './supabase';
 type RequestOptions = RequestInit & { query?: Record<string, any> };
 
 // Production uses the separate Express API; local development falls back to Vite's proxy.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
+// Keep production requests on the current domain. A stale VITE_API_URL from a
+// previous Vercel deployment must not make avort.ir call the old deployment.
+const configuredApi = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+const API_BASE = (() => {
+  if (!configuredApi) return '/api';
+  if (configuredApi.startsWith('/')) return configuredApi;
+  try {
+    return new URL(configuredApi, window.location.origin).origin === window.location.origin
+      ? new URL(configuredApi, window.location.origin).pathname.replace(/\/$/, '') || '/api'
+      : '/api';
+  } catch { return '/api'; }
+})();
 
 function buildUrl(path: string, query?: Record<string, any>) {
   let url = `${API_BASE}${path}`;

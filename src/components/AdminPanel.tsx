@@ -4,7 +4,7 @@ import { ShieldAlert, Plus, Trash2, Edit3, Package, DollarSign, ShoppingBag, Che
 import { Brand, Category, OrderStatus, Product } from '../types';
 
 export const AdminPanel: React.FC = () => {
-  const { user, products, orders, addProduct, updateProduct, deleteProduct, updateOrderStatus, refreshOrders, setIsLoginModalOpen } = useStore();
+  const { user, products, orders, addProduct, updateProduct, deleteProduct, deleteOrder, updateOrderStatus, refreshOrders, setIsLoginModalOpen } = useStore();
 
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add-product'>('products');
   const [orderSearch, setOrderSearch] = useState('');
@@ -577,6 +577,7 @@ export const AdminPanel: React.FC = () => {
                       <option value="SHIPPED">تحویل به پست (ارسال شده)</option>
                       <option value="DELIVERED">تحویل داده شد</option>
                     </select>
+                    <button type="button" onClick={() => { if (confirm('حذف این سفارش انجام شود؟')) deleteOrder(o.id).catch((e) => alert(`حذف سفارش انجام نشد: ${e instanceof Error ? e.message : 'خطا'}`)); }} className="rounded-xl bg-rose-50 p-2 text-rose-600" title="حذف سفارش"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
 

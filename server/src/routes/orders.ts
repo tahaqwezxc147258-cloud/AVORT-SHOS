@@ -71,4 +71,12 @@ router.put('/:id', requireAdmin, async (req, res) => {
   return res.json({ order: data });
 });
 
+router.delete('/:id', requireAdmin, async (req, res) => {
+  const { error: itemsError } = await supabase.from('OrderItem').delete().eq('orderId', req.params.id);
+  if (itemsError) return res.status(400).json({ error: itemsError.message });
+  const { error } = await supabase.from('Order').delete().eq('id', req.params.id);
+  if (error) return res.status(400).json({ error: error.message });
+  return res.json({ ok: true });
+});
+
 export default router;
