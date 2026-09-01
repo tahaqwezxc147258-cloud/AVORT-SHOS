@@ -82,6 +82,12 @@ export const Header: React.FC = () => {
             >
               کتانی‌های نایک
             </button>
+            <button
+              onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }}
+              className="px-4 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all"
+            >
+              کالکشن زنانه
+            </button>
           </nav>
         </div>
 

@@ -1,7 +1,9 @@
 export type Brand = 'نایک' | 'جردن' | 'آدیداس' | 'پوما' | 'بالنسیaga' | 'کانورس';
 export type Category = 'همه' | 'جردن' | 'نایک' | 'باشگاه' | 'باشگاهی' | 'رانینگ' | 'کلاسیک';
+export type ProductGender = 'مردانه' | 'زنانه' | 'یونیسکس';
 export interface ShoeColor { name: string; hex: string; image?: string; }
-export interface Product { id: string; name: string; nameFa: string; brand: Brand; category: Category; subtitle: string; priceToman: number; originalPriceToman?: number; rating: number; reviewsCount: number; images: string[]; colors: ShoeColor[]; sizes: number[]; inStock: boolean; stockCount: number; description: string; isPopular?: boolean; isSpecialOffer?: boolean; isHeroFeatured?: boolean; resellPriceRange?: string; specialBoxAvailable?: boolean; specialBoxPrice?: number; }
+export interface Product { id: string; name: string; nameFa: string; brand: Brand; category: Category; gender?: ProductGender; subtitle: string; priceToman: number; originalPriceToman?: number; rating: number; reviewsCount: number; images: string[]; colors: ShoeColor[]; sizes: number[]; inStock: boolean; stockCount: number; description: string; isPopular?: boolean; isSpecialOffer?: boolean; isHeroFeatured?: boolean; resellPriceRange?: string; specialBoxAvailable?: boolean; specialBoxPrice?: number; }
+export interface Banner { id: string; desktopImage: string; mobileImage?: string; title: string; description?: string; buttonLabel?: string; href?: string; isActive: boolean; sortOrder: number; createdAt?: string; updatedAt?: string; }
 export interface CartItem { product: Product; selectedSize: number; selectedColor: ShoeColor; quantity: number; withSpecialBox?: boolean; specialBoxPrice?: number; }
 export interface Address { id: string; title: string; receiverName: string; phone: string; city: string; address: string; postalCode: string; isDefault?: boolean; }
 export interface User { id: string; phone: string; fullName: string; avatar: string; addresses: Address[]; role: 'user' | 'admin'; }

@@ -25,4 +25,17 @@ router.post('/', requireAdmin, async (req, res) => {
   res.json({ product: data });
 });
 router.put('/:id', requireAdmin, async (req, res) => { const { id: _id, createdAt: _createdAt, ...fields } = req.body; const { data, error } = await supabase.from('Product').update({ ...fields, updatedAt: new Date().toISOString() }).eq('id', req.params.id).select().single(); if (error) return res.status(400).json({ error: error.message, code: error.code }); res.json({ product: data }); });
+router.delete('/:id', requireAdmin, async (req, res) => {
+  const id = String(req.params.id || '');
+  if (!id) return res.status(400).json({ error: 'Product id is required' });
+  await supabase.from('CartItem').delete().eq('productId', id);
+  const { error } = await supabase.from('Product').delete().eq('id', id);
+  if (error?.code === '23503') {
+    const archived = await supabase.from('Product').update({ isArchived: true, updatedAt: new Date().toISOString() }).eq('id', id);
+    if (archived.error) return res.status(400).json({ error: archived.error.message });
+    return res.json({ ok: true, archived: true });
+  }
+  if (error) return res.status(400).json({ error: error.message, code: error.code });
+  return res.json({ ok: true, deleted: true });
+});
 export default router;

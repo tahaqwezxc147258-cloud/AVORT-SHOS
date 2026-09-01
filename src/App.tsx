@@ -22,7 +22,7 @@ import { SeoPages } from './components/SeoPages';
 const MainContent: React.FC = () => {
   const { viewMode, selectedProduct, setSelectedProduct } = useStore();
   const path = window.location.pathname.replace(/\/$/, '') || '/';
-  const isBrandCollection = path === '/collection/jordan' || path === '/collection/nike';
+  const isBrandCollection = path === '/collection/jordan' || path === '/collection/nike' || path === '/collection/women';
   const isProductPage = path.startsWith('/product/');
   const isSeoPage = !isBrandCollection && !isProductPage && path !== '/' && path !== '/shop' && path !== '/cart' && path !== '/profile' && path !== '/admin';
 

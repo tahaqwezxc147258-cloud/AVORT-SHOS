@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js';
 import cartRouter from './routes/cart.js';
 import ordersRouter from './routes/orders.js';
 import paymentsRouter from './routes/payments.js';
+import bannersRouter from './routes/banners.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ apiRouter.use('/session', authRouter);
 apiRouter.use('/cart', cartRouter);
 apiRouter.use('/orders', ordersRouter);
 apiRouter.use('/payments', paymentsRouter);
+apiRouter.use('/banners', bannersRouter);
 apiRouter.get('/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api', apiRouter);

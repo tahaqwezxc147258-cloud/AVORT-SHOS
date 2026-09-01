@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { Product, CartItem, User, Order, Category, ViewMode, ShoeColor, OrderStatus, Address } from '../types';
+import { Product, CartItem, User, Order, Category, ViewMode, ShoeColor, OrderStatus, Address, Banner } from '../types';
 import { INITIAL_PRODUCTS } from '../data/products';
 import api from '../api';
 
@@ -7,6 +7,7 @@ export type OtpResult = { success: boolean; message?: string; retryAfter?: numbe
 
 interface StoreContextType {
   products: Product[];
+  banners: Banner[];
   isProductsLoading: boolean;
   cart: CartItem[];
   wishlist: string[];
@@ -56,6 +57,10 @@ interface StoreContextType {
   deleteOrder: (id: string) => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   refreshOrders: () => Promise<void>;
+  refreshBanners: () => Promise<void>;
+  addBanner: (banner: Omit<Banner, 'id'>) => Promise<Banner>;
+  updateBanner: (id: string, fields: Partial<Banner>) => Promise<void>;
+  deleteBanner: (id: string) => Promise<void>;
   updateProfile: (updates: Pick<User, 'fullName' | 'avatar'>) => Promise<void>;
   saveAddress: (address: Omit<Address, 'id'> & { id?: string }) => Promise<void>;
   removeAddress: (addressId: string) => Promise<void>;
@@ -89,6 +94,7 @@ const getViewModeFromPath = (path: string): ViewMode => {
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('noir_token'));
   const [user, setUser] = useState<User | null>(() => {
@@ -139,6 +145,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const res: any = await api.get('/orders');
     setOrders(res.orders || []);
   };
+  const refreshBanners = async () => { const res: any = await api.get('/banners/all'); setBanners(res.banners || []); };
+  const addBanner = async (banner: Omit<Banner, 'id'>) => { const res: any = await api.post('/banners', banner); const created = res.banner as Banner; setBanners(prev => [...prev, created].sort((a,b) => a.sortOrder - b.sortOrder)); return created; };
+  const updateBanner = async (id: string, fields: Partial<Banner>) => { const res: any = await api.put(`/banners/${id}`, fields); setBanners(prev => prev.map(b => b.id === id ? { ...b, ...(res.banner || fields) } : b)); };
+  const deleteBanner = async (id: string) => { await api.del(`/banners/${id}`); setBanners(prev => prev.filter(b => b.id !== id)); };
 
   useEffect(() => {
     if (user) localStorage.setItem('noir_user', JSON.stringify(user));
@@ -156,6 +166,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     return () => window.removeEventListener('popstate', syncViewModeFromLocation);
   }, []);
+  useEffect(() => { api.get('/banners').then((res: any) => setBanners(res.banners || [])).catch(() => {}); }, []);
 
   const setViewMode = (mode: ViewMode) => {
     setViewModeState(mode);
@@ -524,7 +535,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteProduct = async (id: string) => {
-    await api.post('/products', { _action: 'delete', id });
+    await api.del(`/products/${id}`);
     setProducts(prev => prev.filter(p => p.id !== id));
   };
 
@@ -585,6 +596,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <StoreContext.Provider
       value={{
         products,
+        banners,
         isProductsLoading,
         cart,
         wishlist,
@@ -625,6 +637,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteOrder,
         updateOrderStatus
         ,refreshOrders
+        ,refreshBanners, addBanner, updateBanner, deleteBanner
         ,updateProfile
         ,saveAddress
         ,removeAddress

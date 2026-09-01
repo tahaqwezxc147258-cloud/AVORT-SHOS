@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShoeCard } from './ShoeCard';
 import { Filter, SlidersHorizontal, Search, RotateCcw, Check } from 'lucide-react';
-import { Brand, Category } from '../types';
+import { Brand, Category, ProductGender } from '../types';
 
 export const ShopView: React.FC = () => {
   const { products, isProductsLoading, searchQuery, setSearchQuery, activeCategory, setActiveCategory } = useStore();
@@ -11,10 +11,12 @@ export const ShopView: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'popular' | 'price-asc' | 'price-desc' | 'rating'>('popular');
   const [maxPrice, setMaxPrice] = useState<number>(100000000);
+  const [selectedGender, setSelectedGender] = useState<ProductGender | 'همه'>('همه');
 
   const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
   const collectionBrand = window.location.pathname === '/collection/jordan' ? 'جردن' :
     window.location.pathname === '/collection/nike' ? 'نایک' : null;
+  const womenCollection = window.location.pathname === '/collection/women';
 
   // Filtering Logic
   let filtered = products.filter(p => {
@@ -26,10 +28,11 @@ export const ShopView: React.FC = () => {
       ? p.brand === collectionBrand || p.category === collectionBrand
       : selectedBrand === 'همه' || p.brand === selectedBrand;
     const matchesCategory = collectionBrand || activeCategory === 'همه' || p.category === activeCategory;
+    const matchesGender = womenCollection ? p.gender === 'زنانه' : selectedGender === 'همه' || p.gender === selectedGender;
     const matchesSize = selectedSize === null || p.sizes.includes(selectedSize);
     const matchesPrice = p.priceToman <= maxPrice;
 
-    return matchesSearch && matchesBrand && matchesCategory && matchesSize && matchesPrice;
+    return matchesSearch && matchesBrand && matchesCategory && matchesGender && matchesSize && matchesPrice;
   });
 
   // Sorting
@@ -46,6 +49,7 @@ export const ShopView: React.FC = () => {
     setSelectedSize(null);
     setMaxPrice(100000000);
     setSearchQuery('');
+    setSelectedGender('همه');
   };
 
   return (
@@ -66,7 +70,8 @@ export const ShopView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Right Sidebar Filters (Desktop & Mobile) */}
-        <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-cyan-100 shadow-sm space-y-6">
+          <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-cyan-100 shadow-sm space-y-6">
+          <div className="space-y-2"><label className="text-xs font-extrabold text-slate-700 block">جنسیت</label><div className="flex gap-1.5">{(['همه','مردانه','زنانه','یونیسکس'] as const).map(g => <button key={g} onClick={() => setSelectedGender(g)} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${selectedGender === g ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}>{g}</button>)}</div></div>
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
               <Filter className="w-4 h-4 text-cyan-500" />

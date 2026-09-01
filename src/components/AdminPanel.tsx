@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShieldAlert, Plus, Trash2, Edit3, Package, DollarSign, ShoppingBag, CheckCircle, Save, Image as ImageIcon, Search, RefreshCw, Clock3 } from 'lucide-react';
-import { Brand, Category, OrderStatus, Product } from '../types';
+import { Brand, Category, OrderStatus, Product, ProductGender } from '../types';
+import { BannerManager } from './BannerManager';
 
 export const AdminPanel: React.FC = () => {
   const { user, products, orders, addProduct, updateProduct, deleteProduct, deleteOrder, updateOrderStatus, refreshOrders, setIsLoginModalOpen } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add-product'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add-product' | 'banners'>('products');
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [orderSort, setOrderSort] = useState<'newest' | 'oldest'>('newest');
@@ -18,6 +19,7 @@ export const AdminPanel: React.FC = () => {
   const [nameFa, setNameFa] = useState('');
   const [brand, setBrand] = useState<Brand>('جردن');
   const [category, setCategory] = useState<Category>('جردن');
+  const [gender, setGender] = useState<ProductGender>('یونیسکس');
   const [subtitle, setSubtitle] = useState('کتانی تخصصی و اورجینال');
   const [priceToman, setPriceToman] = useState<number>(11000000);
   const [imageUrls, setImageUrls] = useState('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=800');
@@ -223,6 +225,7 @@ export const AdminPanel: React.FC = () => {
       nameFa,
       brand,
       category,
+      gender,
       subtitle,
       priceToman: Number(priceToman),
       originalPriceToman: Number(priceToman) + 1500000,
@@ -327,7 +330,11 @@ export const AdminPanel: React.FC = () => {
         </div>
       </div>
 
+      <button onClick={() => setActiveTab('banners')} className="rounded-xl bg-cyan-50 px-4 py-2 text-xs font-bold text-cyan-700">مدیریت بنرها</button>
+
       {/* TAB 1: Products Table */}
+      {activeTab === 'banners' && <BannerManager />}
+
       {activeTab === 'products' && (
         <div className="bg-white rounded-3xl p-6 border border-cyan-100 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -644,6 +651,13 @@ export const AdminPanel: React.FC = () => {
                 <option value="جردن">جردن</option>
                 <option value="نایک">نایک</option>
                 <option value="آدیداس">آدیداس</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 mb-1">جنسیت محصول *</label>
+              <select value={gender} onChange={e => setGender(e.target.value as ProductGender)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900">
+                <option value="مردانه">مردانه</option><option value="زنانه">زنانه</option><option value="یونیسکس">یونیسکس</option>
               </select>
             </div>
 

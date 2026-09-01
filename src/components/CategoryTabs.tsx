@@ -46,6 +46,7 @@ export const CategoryTabs: React.FC = () => {
 
       {/* Category Tabs Scroll Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+        <button onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }} className="px-5 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap bg-rose-50 text-rose-600 border border-rose-100">زنانه</button>
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat;
           return (
