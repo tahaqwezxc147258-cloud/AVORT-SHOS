@@ -27,7 +27,7 @@ router.get('/all', requireAdmin, async (_req, res) => {
 router.post('/', requireAdmin, async (req, res) => {
   const body = req.body || {};
   if (!body.desktopImage || !String(body.title || '').trim()) return res.status(400).json({ error: 'تصویر دسکتاپ و عنوان الزامی است' });
-  const payload = { id: randomUUID(), desktopImage: body.desktopImage, mobileImage: body.mobileImage || null, title: String(body.title).trim(), description: String(body.description || ''), buttonLabel: String(body.buttonLabel || ''), href: String(body.href || '/shop'), isActive: body.isActive !== false, sortOrder: Number(body.sortOrder || 0), updatedAt: new Date().toISOString() };
+  const payload = { id: randomUUID(), desktopImage: body.desktopImage, mobileImage: body.mobileImage || null, title: String(body.title).trim(), description: String(body.description || ''), buttonLabel: String(body.buttonLabel || ''), href: String(body.href || '/shop'), productId: body.productId || null, imageIndex: body.imageIndex == null ? null : Number(body.imageIndex), isActive: body.isActive !== false, sortOrder: Number(body.sortOrder || 0), updatedAt: new Date().toISOString() };
   const { data, error } = await supabase.from('Banner').insert(payload).select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json({ banner: data });

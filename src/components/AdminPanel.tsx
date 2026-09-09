@@ -3,6 +3,7 @@ import { useStore } from '../context/StoreContext';
 import { ShieldAlert, Plus, Trash2, Edit3, Package, DollarSign, ShoppingBag, CheckCircle, Save, Image as ImageIcon, Search, RefreshCw, Clock3 } from 'lucide-react';
 import { Brand, Category, OrderStatus, Product, ProductGender } from '../types';
 import { BannerManager } from './BannerManager';
+import { ProductEditModal } from './ProductEditModal';
 
 export const AdminPanel: React.FC = () => {
   const { user, products, orders, addProduct, updateProduct, deleteProduct, deleteOrder, updateOrderStatus, refreshOrders, setIsLoginModalOpen } = useStore();
@@ -13,6 +14,8 @@ export const AdminPanel: React.FC = () => {
   const [orderSort, setOrderSort] = useState<'newest' | 'oldest'>('newest');
   const [orderError, setOrderError] = useState('');
   const [isRefreshingOrders, setIsRefreshingOrders] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productFilter, setProductFilter] = useState('');
 
   // New Product Form State
   const [name, setName] = useState('');
@@ -350,6 +353,7 @@ export const AdminPanel: React.FC = () => {
               <span>افزودن محصول جدید</span>
             </button>
           </div>
+          <input value={productFilter} onChange={e => setProductFilter(e.target.value)} placeholder="جست‌وجو بر اساس نام، برند یا دسته‌بندی" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-right">
@@ -366,7 +370,7 @@ export const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-bold">
-                {products.map((p) => (
+                {products.filter(p => `${p.name} ${p.nameFa} ${p.brand} ${p.category}`.toLowerCase().includes(productFilter.toLowerCase())).map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/50">
                     {/* Image preview + Image URL Editor */}
                     <td className="p-3 max-w-[180px]">
@@ -509,6 +513,7 @@ export const AdminPanel: React.FC = () => {
 
                     {/* Hero carousel toggle */}
                     <td className="p-3 text-center">
+                      <button onClick={() => setEditingProduct(p)} className="text-cyan-700 bg-cyan-50 rounded-xl px-2 py-1 text-[10px] ml-1">ویرایش کامل</button>
                       <button
                         type="button"
                         onClick={() => updateProduct(p.id, { isHeroFeatured: !p.isHeroFeatured })}
@@ -548,6 +553,8 @@ export const AdminPanel: React.FC = () => {
           </div>
         </div>
       )}
+
+      {activeTab === 'products' && editingProduct && <ProductEditModal product={editingProduct} onClose={() => setEditingProduct(null)} onSave={fields => updateProduct(editingProduct.id, fields)} />}
 
       {/* TAB 2: Order Management */}
       {activeTab === 'orders' && (

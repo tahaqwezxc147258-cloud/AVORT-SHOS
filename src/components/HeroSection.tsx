@@ -14,7 +14,14 @@ export const HeroSection: React.FC = () => {
 
   if (banners.length > 0) {
     const banner = banners[0];
-    return <section className="max-w-7xl mx-auto px-4 lg:px-8 py-8"><a href={banner.href || '/shop'} className="block relative overflow-hidden rounded-3xl shadow-xl"><picture>{banner.mobileImage && <source media="(max-width: 640px)" srcSet={banner.mobileImage} />}<img src={banner.desktopImage} alt={banner.title} className="w-full aspect-[16/6] sm:aspect-[16/6] object-cover" /></picture><div className="absolute inset-0 flex flex-col justify-center items-start p-6 sm:p-12 text-white bg-gradient-to-l from-slate-950/75 to-transparent"><h1 className="text-2xl sm:text-4xl font-black">{banner.title}</h1>{banner.description && <p className="mt-2 text-sm">{banner.description}</p>}{banner.buttonLabel && <span className="mt-4 rounded-xl bg-cyan-500 px-5 py-2 text-xs font-bold">{banner.buttonLabel}</span>}</div></a></section>;
+    const bannerProduct = banner.productId ? products.find(p => p.id === banner.productId) : undefined;
+    const bannerHref = bannerProduct ? undefined : (banner.href || '/shop');
+    const openBanner = (event: React.MouseEvent) => {
+      if (!bannerProduct) return;
+      event.preventDefault();
+      setSelectedProduct(bannerProduct);
+    };
+    return <section className="max-w-7xl mx-auto px-4 lg:px-8 py-8"><a href={bannerHref} onClick={openBanner} className="block relative overflow-hidden rounded-3xl shadow-xl"><picture>{banner.mobileImage && <source media="(max-width: 640px)" srcSet={banner.mobileImage} />}<img src={banner.desktopImage} alt={banner.title} className="w-full aspect-[16/6] sm:aspect-[16/6] object-cover" /></picture><div className="absolute inset-0 flex flex-col justify-center items-start p-6 sm:p-12 text-white bg-gradient-to-l from-slate-950/75 to-transparent"><h1 className="text-2xl sm:text-4xl font-black">{banner.title}</h1>{banner.description && <p className="mt-2 text-sm">{banner.description}</p>}{banner.buttonLabel && <span className="mt-4 rounded-xl bg-cyan-500 px-5 py-2 text-xs font-bold">{banner.buttonLabel}</span>}</div></a></section>;
   }
   if (!currentHero) return null;
 
