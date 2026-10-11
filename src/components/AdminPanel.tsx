@@ -513,7 +513,6 @@ export const AdminPanel: React.FC = () => {
 
                     {/* Hero carousel toggle */}
                     <td className="p-3 text-center">
-                      <button onClick={() => setEditingProduct(p)} className="text-cyan-700 bg-cyan-50 rounded-xl px-2 py-1 text-[10px] ml-1">ویرایش کامل</button>
                       <button
                         type="button"
                         onClick={() => updateProduct(p.id, { isHeroFeatured: !p.isHeroFeatured })}
@@ -530,21 +529,26 @@ export const AdminPanel: React.FC = () => {
 
                     {/* Delete action */}
                     <td className="p-3 text-center">
-                      <button
-                        onClick={() => {
-                          if (confirm(`آیا از حذف محصول ${p.nameFa} اطمینان دارید؟`)) {
-                            deleteProduct(p.id).catch((error) => {
-                              console.error('Product deletion failed:', error);
-                              const detail = error instanceof Error ? error.message : 'خطای ناشناخته';
-                              alert(`حذف محصول انجام نشد: ${detail}`);
-                            });
-                          }
-                        }}
-                        className="text-rose-500 hover:text-rose-700 p-2 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors"
-                        title="حذف محصول"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => setEditingProduct(p)} className="inline-flex items-center gap-1 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-xl px-2 py-1.5 text-[10px]" title={`ویرایش ${p.nameFa}`}>
+                          <Edit3 className="w-3.5 h-3.5" />ویرایش
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`آیا از حذف محصول ${p.nameFa} اطمینان دارید؟`)) {
+                              deleteProduct(p.id).catch((error) => {
+                                console.error('Product deletion failed:', error);
+                                const detail = error instanceof Error ? error.message : 'خطای ناشناخته';
+                                alert(`حذف محصول انجام نشد: ${detail}`);
+                              });
+                            }
+                          }}
+                          className="text-rose-500 hover:text-rose-700 p-2 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors"
+                          title="حذف محصول"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

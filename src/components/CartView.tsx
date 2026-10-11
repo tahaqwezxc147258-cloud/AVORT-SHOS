@@ -51,9 +51,8 @@ export const CartView: React.FC = () => {
 
   const itemsSubtotal = cart.reduce((sum, item) => sum + (item.product.priceToman * item.quantity), 0);
   const packagingTotal = cart.reduce((sum, item) => sum + (item.withSpecialBox ? (item.product.specialBoxPrice || 350000) * item.quantity : 0), 0);
-  const shippingFee = cart.length === 0 ? 0 : 200000;
   const discountAmount = Math.round((itemsSubtotal * discountPercent) / 100);
-  const finalTotal = itemsSubtotal + packagingTotal + shippingFee;
+  const finalTotal = itemsSubtotal + packagingTotal;
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -316,11 +315,6 @@ export const CartView: React.FC = () => {
               <div className="flex justify-between">
                 <span>مجموع قیمت محصولات:</span>
                 <span className="text-slate-900 font-extrabold">{itemsSubtotal.toLocaleString('fa-IR')} تومان</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>هزینه ارسال پست پیشتاز:</span>
-                <span className="text-slate-900 font-extrabold">{`${shippingFee.toLocaleString('fa-IR')} تومان`}</span>
               </div>
 
               {false && discountAmount > 0 && (

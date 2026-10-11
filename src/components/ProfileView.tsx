@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Heart, LogIn, MapPin, Package, Plus, Save, Trash2, UserRound } from 'lucide-react';
+import { Heart, LogIn, LogOut, MapPin, Package, Plus, Save, Trash2, UserRound } from 'lucide-react';
 import rawCities from 'iran-cities/json/city.json';
 import rawProvinces from 'iran-cities/json/province.json';
 import { Address } from '../types';
@@ -47,7 +47,7 @@ const AddressEditor: React.FC<{ draft: AddressDraft; onSave: (draft: AddressDraf
 };
 
 export const ProfileView: React.FC = () => {
-  const { user, orders, products, wishlist, setSelectedProduct, setViewMode, setIsLoginModalOpen, updateProfile, saveAddress, removeAddress } = useStore();
+  const { user, orders, products, wishlist, setSelectedProduct, setViewMode, setIsLoginModalOpen, updateProfile, saveAddress, removeAddress, logout } = useStore();
   const [tab, setTab] = useState<Tab>('profile');
   const [name, setName] = useState(user?.fullName || '');
   const [addressDraft, setAddressDraft] = useState<AddressDraft | null>(null);
@@ -55,7 +55,7 @@ export const ProfileView: React.FC = () => {
   if (!user) return <section className="max-w-xl mx-auto px-4 py-16 text-center space-y-5"><div className="w-16 h-16 mx-auto rounded-3xl bg-cyan-100 text-cyan-600 grid place-items-center"><UserRound /></div><h1 className="text-2xl font-black">حساب کاربری</h1><p className="text-slate-600">برای ثبت مشخصات و آدرس، ابتدا وارد شوید.</p><button onClick={() => setIsLoginModalOpen(true)} className="bg-cyan-500 text-white rounded-2xl px-6 py-3 font-bold inline-flex gap-2"><LogIn className="w-4 h-4" />ورود یا ثبت‌نام</button></section>;
   const tabs: Array<[Tab, string, React.ElementType]> = [['profile', 'مشخصات من', UserRound], ['addresses', 'آدرس‌ها', MapPin], ['orders', 'سفارش‌ها', Package], ['wishlist', 'علاقه‌مندی‌ها', Heart]];
   return <section className="max-w-6xl mx-auto px-4 lg:px-8 py-8 space-y-6">
-    <header className="rounded-3xl bg-slate-900 text-white p-6 sm:p-8 flex flex-wrap gap-5 justify-between items-center"><div className="flex gap-4 items-center"><div className="w-16 h-16 bg-cyan-500 rounded-2xl grid place-items-center"><UserRound className="w-8 h-8" /></div><div><h1 className="text-2xl font-black">{user.fullName || 'حساب کاربری'}</h1><p className="text-slate-300 text-sm dir-ltr text-right">{user.phone}</p></div></div><button onClick={() => setViewMode('shop')} className="rounded-2xl bg-cyan-500 px-5 py-3 font-bold">ادامه خرید</button></header>
+    <header className="rounded-3xl bg-slate-900 text-white p-6 sm:p-8 flex flex-wrap gap-5 justify-between items-center"><div className="flex gap-4 items-center"><div className="w-16 h-16 bg-cyan-500 rounded-2xl grid place-items-center"><UserRound className="w-8 h-8" /></div><div><h1 className="text-2xl font-black">{user.fullName || 'حساب کاربری'}</h1><p className="text-slate-300 text-sm dir-ltr text-right">{user.phone}</p></div></div><div className="flex w-full gap-2 sm:w-auto"><button onClick={() => setViewMode('shop')} className="flex-1 rounded-2xl bg-cyan-500 px-5 py-3 font-bold sm:flex-none">ادامه خرید</button><button onClick={() => { logout(); setViewMode('home'); }} className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 font-bold text-white hover:bg-white/20 sm:flex-none"><LogOut className="h-4 w-4" />خروج از حساب</button></div></header>
     <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6"><nav className="rounded-3xl border border-cyan-100 bg-white p-3 flex lg:flex-col gap-2 overflow-x-auto">{tabs.map(([id, label, Icon]) => <button key={id} onClick={() => setTab(id)} className={`shrink-0 rounded-2xl px-4 py-3 flex items-center gap-2 text-sm font-bold ${tab === id ? 'bg-cyan-500 text-white' : 'text-slate-600 hover:bg-cyan-50'}`}><Icon className="w-4 h-4" />{label}</button>)}</nav>
       <main className="rounded-3xl border border-cyan-100 bg-white p-5 sm:p-7 min-h-96">
         {tab === 'profile' && <form onSubmit={async e => { e.preventDefault(); await updateProfile({ fullName: name, avatar: user.avatar }); }} className="max-w-xl space-y-5"><h2 className="text-lg font-black">اطلاعات شخصی</h2><label className="block text-sm font-bold">نام و نام خانوادگی<input required value={name} onChange={e => setName(e.target.value)} placeholder="مثلاً علی رضایی" className={inputClass} /></label><p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500">تصویر پروفایل به‌صورت خودکار از حرف اول نام یا شمارهٔ شما ساخته می‌شود.</p><button className="rounded-xl bg-cyan-500 px-5 py-3 text-white font-bold inline-flex gap-2"><Save className="w-4 h-4" />ذخیرهٔ تغییرات</button></form>}

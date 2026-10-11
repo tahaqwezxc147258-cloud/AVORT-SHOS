@@ -16,7 +16,7 @@ export const NewsletterFooter: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs border-t border-slate-100 pt-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2"><div className="w-7 h-7 rounded-lg bg-cyan-500 text-white font-black flex items-center justify-center text-sm">N</div><span className="font-extrabold text-lg text-slate-900 tracking-wider">ایوُرت</span></div>
+            <div className="flex items-center gap-2"><div className="w-7 h-7 rounded-lg bg-cyan-500 text-white font-black flex items-center justify-center text-sm">آ</div><span className="font-extrabold text-lg text-slate-900 tracking-wider">آورت</span></div>
             <p className="text-slate-500 leading-relaxed">فروشگاهی برای انتخاب کتونی‌های باکیفیت، راحت و مناسب استفاده روزمره.</p>
             <div className="flex items-center gap-2 pt-2">
               <a href="https://www.instagram.com/avort.shoes/" target="_blank" rel="noreferrer" aria-label="Instagram Avort" className="text-pink-600 text-xs font-bold">اینستاگرام Avort</a>
@@ -35,10 +35,10 @@ export const NewsletterFooter: React.FC = () => {
             <div className="flex flex-wrap gap-x-4 gap-y-2 pt-3 text-slate-600"><a href="/about">درباره ما</a><a href="/contact">تماس با ما</a><a href="/purchase-rules">قوانین خرید</a><a href="/returns">مرجوعی</a><a href="/shipping">ارسال</a><a href="/privacy">حریم خصوصی</a><a href="/articles">مقالات</a></div>
           </div>
 
-          <div className="space-y-1"><h4 className="font-extrabold text-slate-900">تماس با ایوُرت</h4><p className="text-cyan-600 dir-ltr text-right font-black text-sm">09382475438</p><p className="text-slate-500">پاسخ‌گویی برای انتخاب سایز و پیگیری سفارش</p></div>
+          <div className="space-y-1"><h4 className="font-extrabold text-slate-900">تماس با آورت</h4><p className="text-slate-500">پاسخ‌گویی برای انتخاب سایز و پیگیری سفارش</p></div>
         </div>
 
-        <div className="text-center text-xs text-slate-400 pt-4 border-t border-slate-100">فروشگاه آنلاین کتونی ایوُرت © ۲۰۲۶ - تمامی حقوق محفوظ است.</div>
+        <div className="text-center text-xs text-slate-400 pt-4 border-t border-slate-100">فروشگاه آنلاین کتونی آورت © ۲۰۲۶ - تمامی حقوق محفوظ است.</div>
         <div className="flex justify-center pt-4">
           <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5' alt='' style={{ cursor: 'pointer' }} code='w40rZvRfboztUEStJQMazJQw6bzHxHY5' /></a>
         </div>

@@ -2,6 +2,7 @@
   "framework": "vite",
   "functions": {
     "api/[...path].ts": { "maxDuration": 30 },
+    "api/products/index.ts": { "maxDuration": 30 },
     "api/products/[id].ts": { "maxDuration": 30 },
     "api/orders/[id].ts": { "maxDuration": 30 },
     "api/banners/[id].ts": { "maxDuration": 30 },
