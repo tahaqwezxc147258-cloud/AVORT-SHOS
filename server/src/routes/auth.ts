@@ -71,18 +71,29 @@ router.post('/verify-otp', async (req, res) => {
     await supabase.from('OtpCode').update({ attempts: entry.attempts + 1 }).eq('phone', phone);
     return res.status(401).json({ error: 'کد تایید اشتباه است' });
   }
+  if (!process.env.JWT_SECRET) return res.status(500).json({ error: 'JWT_SECRET is not configured on the server' });
   await supabase.from('OtpCode').delete().eq('phone', phone);
   const isAdminPhone = phone === normalizePhone(process.env.ADMIN_PHONE || '09166748552');
-  let { data: user } = await supabase.from('User').select('*').eq('phone', phone).maybeSingle();
+  const { data: existingUser, error: userLookupError } = await supabase.from('User').select('*').eq('phone', phone).maybeSingle();
+  if (userLookupError) {
+    console.error('Failed to look up OTP user', { code: userLookupError.code, message: userLookupError.message });
+    return res.status(500).json({ error: 'Unable to access user account; check server Supabase configuration' });
+  }
+  let user = existingUser;
   if (!user) {
     const now = new Date().toISOString();
     const created = await supabase.from('User').insert({ id: randomUUID(), phone, fullName: '', role: isAdminPhone ? 'ADMIN' : 'USER', createdAt: now, updatedAt: now }).select().single();
+    if (created.error) {
+      console.error('Failed to create OTP user', { code: created.error.code, message: created.error.message });
+      return res.status(500).json({ error: 'Unable to create user account; check server Supabase permissions' });
+    }
     user = created.data;
   } else if (isAdminPhone && user.role !== 'ADMIN') {
     const updated = await supabase.from('User').update({ role: 'ADMIN', updatedAt: new Date().toISOString() }).eq('id', user.id).select().single();
+    if (updated.error) console.error('Failed to update OTP user role', { code: updated.error.code, message: updated.error.message });
     user = updated.data || user;
   }
-  if (!user || !process.env.JWT_SECRET) return res.status(500).json({ error: 'authentication unavailable' });
+  if (!user) return res.status(500).json({ error: 'Unable to load user account' });
   return res.json({ token: jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' }), user: { ...user, role: user.role === 'ADMIN' ? 'admin' : 'user' } });
 });
 
