@@ -11,6 +11,8 @@
 npx prisma db push --schema=server/prisma/schema.prisma
 ```
 
+5. Run `supabase/migrations/20261014_otp_codes.sql` in the Supabase SQL Editor before deploying. The API needs `SUPABASE_URL` and the server-only `SUPABASE_SERVICE_ROLE_KEY` to store and verify OTPs across serverless invocations.
+
 The API uses Prisma models (`User`, `Product`, `CartItem`, `Order`, and `OrderItem`). Do not run the older Supabase SQL migration at the same time, because it creates a different schema.
 
 ## Vercel environment variables
@@ -21,6 +23,8 @@ Add these variables to the Vercel project for **Production**, **Preview**, and *
 VITE_API_URL=/api
 VITE_SITE_URL=https://avort.ir
 DATABASE_URL=your-supabase-postgres-connection-string
+SUPABASE_URL=your-supabase-project-url
+SUPABASE_SERVICE_ROLE_KEY=server-only-supabase-service-role-key
 JWT_SECRET=a-long-random-secret
 ADMIN_PHONE=09166748552
 SMSIR_API_KEY=server-only-smsir-key

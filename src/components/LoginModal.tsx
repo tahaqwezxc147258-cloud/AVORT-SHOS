@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ArrowLeft, X, Smartphone, Pencil, RefreshCw } from 'lucide-react';
 
-const toEnglishDigits = (value: string) => value.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+const toEnglishDigits = (value: string) => value
+  .replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 0x06f0))
+  .replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x0660));
 
 export const LoginModal: React.FC = () => {
   const { isLoginModalOpen, setIsLoginModalOpen, requestOtp, verifyOtp } = useStore();
@@ -46,7 +48,7 @@ export const LoginModal: React.FC = () => {
     {errorMsg && <div className="bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold p-3 rounded-2xl mb-4 text-center">{errorMsg}</div>}
     <form onSubmit={handleLogin} className="space-y-4 text-xs font-bold">
       <div><div className="flex items-center justify-between mb-1"><label className="text-slate-700">شماره همراه *</label>{otpSent && <button type="button" onClick={editPhone} className="flex items-center gap-1 text-cyan-600"><Pencil className="h-3 w-3" />ویرایش شماره</button>}</div><div className="relative"><input type="tel" disabled={otpSent || isBusy} value={phoneNumber} onChange={e => setPhoneNumber(toEnglishDigits(e.target.value))} placeholder="09123456789" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pr-10 pl-4 text-slate-900 dir-ltr text-center font-extrabold focus:outline-none focus:border-cyan-500 text-sm disabled:opacity-60" autoFocus={!otpSent} /><Smartphone className="w-5 h-5 text-slate-400 absolute right-3 top-3" /></div></div>
-      {otpSent && <div><label className="block text-slate-700 mb-1">کد تأیید پیامک</label><input type="text" inputMode="numeric" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} placeholder="123456" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 text-center tracking-[0.5em] font-black text-slate-900" autoFocus /></div>}
+      {otpSent && <div><label className="block text-slate-700 mb-1">کد تأیید پیامک</label><input type="text" inputMode="numeric" maxLength={6} value={otp} onChange={e => setOtp(toEnglishDigits(e.target.value).replace(/\D/g, ''))} placeholder="123456" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 text-center tracking-[0.5em] font-black text-slate-900" autoFocus /></div>}
       <button type="submit" disabled={isBusy || (otpSent && retryAfter > 0 && otp.length === 0)} className="w-full bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white py-3.5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2">{isBusy ? <RefreshCw className="h-4 w-4 animate-spin" /> : <><span>{otpSent ? 'تأیید و ورود' : 'دریافت کد تأیید'}</span><ArrowLeft className="w-4 h-4" /></>}</button>
       {otpSent && <button type="button" disabled={isBusy || retryAfter > 0} onClick={resend} className="w-full text-xs font-bold text-cyan-600 disabled:text-slate-400">{retryAfter > 0 ? `ارسال مجدد پس از ${retryAfter} ثانیه` : 'ارسال مجدد کد'}</button>}
     </form>
