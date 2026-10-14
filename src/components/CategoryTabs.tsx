@@ -3,7 +3,7 @@ import { Category } from '../types';
 import { useStore } from '../context/StoreContext';
 import { Search } from 'lucide-react';
 
-const CATEGORIES: Category[] = ['همه', 'جردن', 'نایک', 'باشگاه', 'رانینگ', 'کلاسیک'];
+const CATEGORIES: Category[] = ['همه', 'جردن', 'نایک'];
 
 export const CategoryTabs: React.FC = () => {
   const { activeCategory, setActiveCategory, searchQuery, setSearchQuery, setViewMode } = useStore();
@@ -46,7 +46,7 @@ export const CategoryTabs: React.FC = () => {
 
       {/* Category Tabs Scroll Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-        <button onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }} className="px-5 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap bg-rose-50 text-rose-600 border border-rose-100">زنانه</button>
+        <button onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }} className="px-5 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 bg-white text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 border border-slate-100">زنانه</button>
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat;
           return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShoeCard } from './ShoeCard';
-import { Filter, SlidersHorizontal, Search, RotateCcw, Check } from 'lucide-react';
+import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 import { Brand, Category, ProductGender } from '../types';
 
 export const ShopView: React.FC = () => {
@@ -12,6 +12,7 @@ export const ShopView: React.FC = () => {
   const [sortBy, setSortBy] = useState<'popular' | 'price-asc' | 'price-desc' | 'rating'>('popular');
   const [maxPrice, setMaxPrice] = useState<number>(100000000);
   const [selectedGender, setSelectedGender] = useState<ProductGender | 'همه'>('همه');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
   const collectionBrand = window.location.pathname === '/collection/jordan' ? 'جردن' :
@@ -27,7 +28,9 @@ export const ShopView: React.FC = () => {
     const matchesBrand = collectionBrand
       ? p.brand === collectionBrand || p.category === collectionBrand
       : selectedBrand === 'همه' || p.brand === selectedBrand;
-    const matchesCategory = collectionBrand || activeCategory === 'همه' || p.category === activeCategory;
+    const matchesCategory = collectionBrand || activeCategory === 'همه' || p.category === activeCategory ||
+      (activeCategory === 'باشگاه' && p.category === 'باشگاهی') ||
+      ((activeCategory === 'جردن' || activeCategory === 'نایک') && p.brand === activeCategory);
     const matchesGender = womenCollection ? p.gender === 'زنانه' : selectedGender === 'همه' || p.gender === selectedGender;
     const matchesSize = selectedSize === null || p.sizes.includes(selectedSize);
     const matchesPrice = p.priceToman <= maxPrice;
@@ -69,8 +72,19 @@ export const ShopView: React.FC = () => {
       {/* Filter and Control Toolbar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Right Sidebar Filters (Desktop & Mobile) */}
-          <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-cyan-100 shadow-sm space-y-6">
+        {/* Filters stay collapsed on mobile so products remain visible. */}
+        <div className="lg:col-span-3 space-y-3">
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen(open => !open)}
+            aria-expanded={mobileFiltersOpen}
+            aria-controls="shop-filters"
+            className="lg:hidden w-full flex items-center justify-between bg-white rounded-2xl px-4 py-3 border border-cyan-100 text-sm font-extrabold text-slate-800 shadow-xs"
+          >
+            <span className="flex items-center gap-2"><SlidersHorizontal className="w-4 h-4 text-cyan-600" />فیلتر محصولات</span>
+            <span className="text-xs font-bold text-cyan-700">{mobileFiltersOpen ? 'بستن' : 'نمایش'}</span>
+          </button>
+          <div id="shop-filters" className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block bg-white rounded-3xl p-5 border border-cyan-100 shadow-sm space-y-6`}>
           <div className="space-y-2"><label className="text-xs font-extrabold text-slate-700 block">جنسیت</label><div className="flex gap-1.5">{(['همه','مردانه','زنانه','یونیسکس'] as const).map(g => <button key={g} onClick={() => setSelectedGender(g)} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${selectedGender === g ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}>{g}</button>)}</div></div>
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
@@ -161,6 +175,7 @@ export const ShopView: React.FC = () => {
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-full accent-cyan-500 cursor-pointer"
             />
+          </div>
           </div>
         </div>
 

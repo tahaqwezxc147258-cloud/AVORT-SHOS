@@ -32,12 +32,9 @@ export const Header: React.FC = () => {
             }}
             className="flex items-center gap-2 cursor-pointer group"
           >
-              <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-black text-sm tracking-tighter shadow-lg shadow-slate-900/20 group-hover:scale-105 transition-transform">
-                AV
-            </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-2xl tracking-wider text-slate-900 group-hover:text-cyan-600 transition-colors">
-                AVORT<span className="text-cyan-500">.</span>
+                AVORT
               </span>
               <span className="text-[10px] text-slate-500 font-medium -mt-1">
                 فروشگاه کفش نایک و جردن
@@ -81,12 +78,6 @@ export const Header: React.FC = () => {
               className="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all"
             >
               کتانی‌های نایک
-            </button>
-            <button
-              onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }}
-              className="px-4 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all"
-            >
-              کالکشن زنانه
             </button>
           </nav>
         </div>

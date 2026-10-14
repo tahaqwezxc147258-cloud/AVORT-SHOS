@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, ShieldCheck, Headphones, ArrowLeft, Ruler, ShoppingBag, MessageCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 export const FeatureBanners: React.FC = () => {
@@ -24,38 +24,6 @@ export const FeatureBanners: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Feature icon={<Truck />} title="ارسال سریع و مطمئن" text="سفارش شما با بسته‌بندی مناسب و امکان پیگیری ارسال می‌شود." />
-        <Feature icon={<ShieldCheck />} title="تضمین کیفیت و تطابق کالا" text="تصاویر و مشخصات هر مدل شفاف است و محصول پیش از ارسال بررسی می‌شود." />
-        <Feature icon={<Headphones />} title="پشتیبانی برای انتخاب سایز" text="برای انتخاب مدل و سایز مناسب می‌توانید با پشتیبانی در تماس باشید." />
-      </div>
-
-      <div className="bg-white rounded-3xl p-6 lg:p-8 border border-cyan-100 shadow-lg space-y-6">
-        <div className="text-center space-y-2">
-          <h3 className="text-2xl lg:text-3xl font-black text-slate-900">راهنمای خرید کتونی</h3>
-          <p className="text-sm text-slate-600">برای انتخاب مطمئن‌تر، مشخصات، سایزهای موجود و تصاویر هر محصول را بررسی کنید.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Guide icon={<ShoppingBag />} title="مدل مناسب را انتخاب کنید" text="وارد صفحه محصول شوید و رنگ و سایز موجود را ببینید." />
-          <Guide icon={<Ruler />} title="سایز پا را اندازه بگیرید" text="پا را روی کاغذ بگذارید و طول آن را از پاشنه تا بلندترین انگشت اندازه بگیرید." />
-          <Guide icon={<MessageCircle />} title="ثبت سفارش و پیگیری" text="اطلاعات ارسال را وارد کنید؛ سپس وضعیت سفارش و کد پیگیری را دنبال کنید." />
-        </div>
-      </div>
     </section>
   );
 };
-
-const Feature: React.FC<{ icon: React.ReactNode; title: string; text: string }> = ({ icon, title, text }) => (
-  <div className="bg-white rounded-3xl p-6 border border-cyan-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
-    <div className="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 [&>svg]:w-7 [&>svg]:h-7">{icon}</div>
-    <div><h3 className="font-extrabold text-slate-900 text-base">{title}</h3><p className="text-xs text-slate-500 mt-1">{text}</p></div>
-  </div>
-);
-
-const Guide: React.FC<{ icon: React.ReactNode; title: string; text: string }> = ({ icon, title, text }) => (
-  <div className="rounded-2xl bg-cyan-50/70 p-5 text-right border border-cyan-100">
-    <div className="text-cyan-600 [&>svg]:w-7 [&>svg]:h-7 mb-3">{icon}</div>
-    <h4 className="font-black text-slate-900 text-sm">{title}</h4>
-    <p className="mt-2 text-xs leading-6 text-slate-600">{text}</p>
-  </div>
-);
