@@ -1,5 +1,14 @@
 # Deployment
 
+## Local development
+
+Run `npm run dev` from the repository root to start both the Vite frontend and
+the Express API. The API reads its environment from `server/.env`; copy
+`server/.env.example` there and set real Supabase credentials, `JWT_SECRET`, and
+SMS.ir credentials before requesting an OTP. The example values are placeholders
+and cannot send SMS. Never use the Supabase service-role key or SMS.ir API key
+in a `VITE_` variable.
+
 ## Supabase
 
 1. Create a Supabase project.
