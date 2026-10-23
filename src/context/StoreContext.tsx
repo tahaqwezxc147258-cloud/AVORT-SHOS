@@ -99,7 +99,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('noir_token'));
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('noir_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (!savedUser) return null;
+    const parsedUser = JSON.parse(savedUser);
+    return { ...parsedUser, addresses: Array.isArray(parsedUser.addresses) ? parsedUser.addresses : [] };
   });
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -217,12 +219,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // when logged in, fetch cart and orders from server
   useEffect(() => {
     if (!token) return;
+    let active = true;
+    api.get('/me')
+      .then((res: any) => {
+        if (active && res.user) {
+          setUser({ ...res.user, addresses: Array.isArray(res.user.addresses) ? res.user.addresses : [] });
+        }
+      })
+      .catch(error => console.error('Profile refresh failed:', error));
     api.get('/cart')
       .then((res: any) => setCart(res.items || []))
       .catch(() => {});
     api.get('/orders')
       .then((res: any) => setOrders(res.orders || []))
       .catch(() => {});
+    return () => { active = false; };
   }, [token]);
 
   // Actions
