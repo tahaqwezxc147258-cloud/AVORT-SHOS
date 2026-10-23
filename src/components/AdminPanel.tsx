@@ -25,7 +25,7 @@ export const AdminPanel: React.FC = () => {
   const [gender, setGender] = useState<ProductGender>('یونیسکس');
   const [subtitle, setSubtitle] = useState('کتانی تخصصی و اورجینال');
   const [priceToman, setPriceToman] = useState<number>(11000000);
-  const [imageUrls, setImageUrls] = useState('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=800');
+  const [imageUrls, setImageUrls] = useState('');
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [stockCount, setStockCount] = useState<number>(10);

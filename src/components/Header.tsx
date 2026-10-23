@@ -25,22 +25,6 @@ export const Header: React.FC = () => {
         
         {/* Right Section (RTL Start): Logo & Admin Pill */}
         <div className="flex items-center gap-6">
-          <div
-            onClick={() => {
-              setViewMode('home');
-              setActiveCategory('همه');
-            }}
-            className="flex items-center gap-2 cursor-pointer group"
-          >
-            <div className="flex flex-col">
-              <span className="font-extrabold text-2xl tracking-wider text-slate-900 group-hover:text-cyan-600 transition-colors">
-                AVORT
-              </span>
-              <span className="text-[10px] text-slate-500 font-medium -mt-1">
-                فروشگاه کفش نایک و جردن
-              </span>
-            </div>
-          </div>
 
           {/* Navigation Links for Desktop */}
           <nav className="hidden md:flex items-center gap-1 bg-white/80 border border-cyan-100/60 p-1.5 rounded-2xl shadow-xs">

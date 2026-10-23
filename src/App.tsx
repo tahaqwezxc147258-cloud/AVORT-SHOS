@@ -4,7 +4,6 @@ import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { CategoryTabs } from './components/CategoryTabs';
 import { PopularProducts } from './components/PopularProducts';
-import { FeatureBanners } from './components/FeatureBanners';
 import { ShopView } from './components/ShopView';
 import { CartView } from './components/CartView';
 import { AdminPanel } from './components/AdminPanel';
@@ -39,7 +38,6 @@ const MainContent: React.FC = () => {
               <HeroSection />
               <CategoryTabs />
               <PopularProducts />
-              <FeatureBanners />
               <SeoContent />
               <NewsletterFooter />
             </>
