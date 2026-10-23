@@ -317,6 +317,10 @@ export const CartView: React.FC = () => {
                 <span className="text-slate-900 font-extrabold">{itemsSubtotal.toLocaleString('fa-IR')} تومان</span>
               </div>
 
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <div><span className="font-black">????????</span><a href="/shipping" className="mr-2 font-bold underline underline-offset-2">????? ????? ? ?????? ????? ?????</a></div>
+                <span className="font-bold whitespace-nowrap">?????? ??? ????</span>
+              </div>
               {false && discountAmount > 0 && (
                 <div className="flex justify-between text-rose-500">
                   <span>تخفیف کد EIVORT2026:</span>

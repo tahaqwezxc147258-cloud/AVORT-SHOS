@@ -20,7 +20,7 @@ export const NewsletterFooter: React.FC = () => {
             <div className="flex items-center gap-2 pt-2">
               <a href="https://www.instagram.com/avort.shoes/" target="_blank" rel="noreferrer" aria-label="Instagram Avort" className="text-pink-600 text-xs font-bold">اینستاگرام Avort</a>
               <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="اینستاگرام" className="w-9 h-9 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-100"><Instagram className="w-5 h-5" /></a>
-              <a href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="تیک تاک" className="w-9 h-9 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center hover:bg-slate-200"><Music2 className="w-5 h-5" /></a>
+              <a href="https://www.tiktok.com/@avort.shoes" target="_blank" rel="noreferrer" aria-label="تیک تاک" className="w-9 h-9 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center hover:bg-slate-200"><Music2 className="w-5 h-5" /></a>
             </div>
           </div>
 

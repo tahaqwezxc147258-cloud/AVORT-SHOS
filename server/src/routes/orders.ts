@@ -35,7 +35,7 @@ router.post('/', optionalUser, async (req, res) => {
     });
   } catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : 'اطلاعات محصول نامعتبر است' }); }
   const subtotal = snapshots.reduce((sum, item) => sum + (item.priceToman + item.specialBoxPrice) * item.quantity, 0);
-  const shippingFee = subtotal >= 10000000 ? 0 : 85000;
+  const shippingFee = 0; // Postage is paid by the customer on delivery (????????).
   const orderId = randomUUID();
   const { data: order, error: orderError } = await supabase.from('Order').insert({ id: orderId, trackingCode: `AVOR-${Date.now().toString(36).toUpperCase()}`, userId, customerName: String(receiverName).trim(), customerPhone: String(phone).trim(), city: String(city).trim(), postalCode: String(postalCode).trim(), shippingAddress: String(address).trim(), totalAmountToman: subtotal + shippingFee, shippingFeeToman: shippingFee, status: 'PENDING_PAYMENT', paymentMethod: 'ZARINPAL' }).select('*').single();
   if (orderError) return res.status(500).json({ error: orderError.message });

@@ -117,7 +117,8 @@ router.post('/verify-otp', async (req, res) => {
     return res.status(500).json({ error: 'مصرف کد تأیید انجام نشد؛ لطفاً دوباره تلاش کنید' });
   }
   if (!consumedOtp) return res.status(401).json({ error: 'کد تأیید منقضی یا قبلاً استفاده شده است' });
-  return res.json({ token, user: { ...user, role: user.role === 'ADMIN' ? 'admin' : 'user' } });
+  const { data: addresses } = await supabase.from('Address').select('*').eq('userId', user.id).order('isDefault', { ascending: false });
+  return res.json({ token, user: { ...user, role: user.role === 'ADMIN' ? 'admin' : 'user', addresses: addresses || [] } });
 });
 
 export default router;

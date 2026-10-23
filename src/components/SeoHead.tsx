@@ -3,35 +3,48 @@ import { useStore } from '../context/StoreContext';
 import { seoArticles } from '../data/seoArticles';
 
 const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://avort.ir').replace(/\/$/, '');
-const defaultTitle = 'خرید کفش و کتانی اصل | آورت';
-const defaultDescription = 'فروشگاه آنلاین آورت؛ خرید کتانی و کفش اصل با تضمین اصالت، قیمت مناسب و ارسال سریع.';
+const defaultTitle = '???? ??? ? ????? | ????';
+const defaultDescription = '??????? ?????? ????? ???? ??? ? ????? ?? ??????? ???? ?????? ?????? ???? ? ?????? ?????.';
+const pageMeta: Record<string, { title: string; description: string }> = {
+  '/about': { title: '?????? ???? | ??????? ??? ? ?????', description: '??????? ?????? ???? ???? ???? ???????? ??? ? ?????.' },
+  '/contact': { title: '???? ?? ???? | ?????? ? ??????????', description: '?????? ?? ???????? ???? ?? ???? ?????? ? ??????????.' },
+  '/shipping': { title: '???????? ????? | ??? ????? ????', description: '??????? ???????? ? ?????? ?????? ????? ??? ???? ?? ????.' },
+  '/purchase-rules': { title: '?????? ???? | ????', description: '?????? ??? ????? ? ??????? ????? ?? ??????? ????.' },
+  '/returns': { title: '????? ?????? ???? | ????', description: '??????? ?????? ?????? ?? ????? ???? ?? ????.' },
+  '/privacy': { title: '???? ????? | ????', description: '????? ??????? ?? ??????? ??????? ?? ??????? ????.' },
+};
 
 export const SeoHead: React.FC = () => {
-  const { viewMode, products, selectedProduct } = useStore();
+  const { viewMode, selectedProduct } = useStore();
   useEffect(() => {
     const path = window.location.pathname.replace(/\/$/, '') || '/';
     const article = path.startsWith('/articles/') ? seoArticles.find(item => item.slug === path.slice(10)) : undefined;
-    const title = article ? `${article.title} | آورت` : selectedProduct ? `${selectedProduct.nameFa || selectedProduct.name} | خرید از آورت` : defaultTitle;
-    const description = article?.description || selectedProduct?.description || defaultDescription;
+    const page = pageMeta[path];
+    const title = article ? `${article.title} | ????` : selectedProduct ? `${selectedProduct.nameFa || selectedProduct.name} | ???? ?? ????` : page?.title || defaultTitle;
+    const description = article?.description || selectedProduct?.description || page?.description || defaultDescription;
     const canonical = siteUrl + path;
     const noindex = ['cart', 'profile', 'admin'].includes(viewMode);
     document.title = title;
     const meta = (name: string, content: string, property = false) => {
       const attr = property ? 'property' : 'name';
-      let el = document.head.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
-      el.content = content;
+      let element = document.head.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
+      if (!element) { element = document.createElement('meta'); element.setAttribute(attr, name); document.head.appendChild(element); }
+      element.content = content;
     };
     meta('description', description); meta('robots', noindex ? 'noindex, nofollow' : 'index, follow');
-    meta('og:title', title, true); meta('og:description', description, true); meta('og:type', article ? 'article' : 'website', true); meta('og:url', canonical, true); meta('og:site_name', 'آورت', true); meta('og:locale', 'fa_IR', true); meta('og:image', `${siteUrl}/og-image.svg`, true);
+    meta('og:title', title, true); meta('og:description', description, true); meta('og:type', article ? 'article' : 'website', true); meta('og:url', canonical, true); meta('og:site_name', '????', true); meta('og:locale', 'fa_IR', true); meta('og:image', `${siteUrl}/og-image.svg`, true);
     meta('twitter:card', 'summary_large_image'); meta('twitter:title', title); meta('twitter:description', description);
-    let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); }
-    link.href = canonical;
-    const data = article ? { '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, url: canonical, author: { '@type': 'Organization', name: 'آورت' }, publisher: { '@type': 'Organization', name: 'آورت' }, inLanguage: 'fa-IR' } : selectedProduct ? { '@context': 'https://schema.org', '@type': 'Product', name: selectedProduct.nameFa || selectedProduct.name, image: selectedProduct.images, description: selectedProduct.description, brand: { '@type': 'Brand', name: selectedProduct.brand }, offers: { '@type': 'Offer', priceCurrency: 'IRR', price: selectedProduct.priceToman * 10, availability: selectedProduct.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canonical } } : { '@context': 'https://schema.org', '@type': ['Organization', 'Store'], name: 'آورت', url: siteUrl, description, areaServed: 'IR', inLanguage: 'fa-IR' };
+    let canonicalLink = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonicalLink) { canonicalLink = document.createElement('link'); canonicalLink.rel = 'canonical'; document.head.appendChild(canonicalLink); }
+    canonicalLink.href = canonical;
+    const data = article
+      ? { '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, url: canonical, inLanguage: 'fa-IR', author: { '@type': 'Organization', name: '????' } }
+      : selectedProduct
+        ? { '@context': 'https://schema.org', '@type': 'Product', name: selectedProduct.nameFa || selectedProduct.name, image: selectedProduct.images, description: selectedProduct.description, brand: { '@type': 'Brand', name: selectedProduct.brand }, offers: { '@type': 'Offer', priceCurrency: 'IRR', price: selectedProduct.priceToman * 10, availability: selectedProduct.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canonical } }
+        : { '@context': 'https://schema.org', '@type': ['Organization', 'Store'], name: '????', url: siteUrl, description, areaServed: 'IR', inLanguage: 'fa-IR', sameAs: ['https://www.instagram.com/avort.shoes/', 'https://www.tiktok.com/@avort.shoes'], contactPoint: { '@type': 'ContactPoint', telephone: '+989374453927', contactType: 'customer service', availableLanguage: 'fa' } };
     let script = document.getElementById('seo-structured-data') as HTMLScriptElement | null;
     if (!script) { script = document.createElement('script'); script.id = 'seo-structured-data'; script.type = 'application/ld+json'; document.head.appendChild(script); }
     script.textContent = JSON.stringify(data);
-  }, [viewMode, products, selectedProduct]);
+  }, [viewMode, selectedProduct]);
   return null;
 };
