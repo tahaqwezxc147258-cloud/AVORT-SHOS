@@ -158,6 +158,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [user]);
 
   useEffect(() => {
+    const handleUnauthorized = () => {
+      setToken(null);
+      setUser(null);
+      setIsLoginModalOpen(true);
+    };
+    window.addEventListener('noir:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('noir:unauthorized', handleUnauthorized);
+  }, []);
+
+  useEffect(() => {
     const syncViewModeFromLocation = () => {
       const nextViewMode = getViewModeFromPath(window.location.pathname);
       setViewModeState(prev => (prev === nextViewMode ? prev : nextViewMode));

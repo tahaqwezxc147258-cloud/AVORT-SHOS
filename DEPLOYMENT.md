@@ -21,6 +21,7 @@ npx prisma db push --schema=server/prisma/schema.prisma
 ```
 
 5. Run `supabase/migrations/20261014_otp_codes.sql` in the Supabase SQL Editor before deploying. The API needs `SUPABASE_URL` and the server-only `SUPABASE_SERVICE_ROLE_KEY` to store and verify OTPs across serverless invocations.
+6. Run `supabase/migrations/20261025_product_gender.sql` in the Supabase SQL Editor. The product API writes to the `"Product"` table through PostgREST, and this migration adds the `gender` column and refreshes PostgREST's schema cache.
 
 The API uses Prisma models (`User`, `Product`, `CartItem`, `Order`, and `OrderItem`). Do not run the older Supabase SQL migration at the same time, because it creates a different schema.
 

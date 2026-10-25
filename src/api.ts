@@ -41,9 +41,6 @@ export async function request<T = any>(path: string, opts: RequestOptions = {}):
   const res = await fetch(buildUrl(path, opts.query), { ...opts, headers });
   if (!res.ok) {
     const text = await res.text();
-    // A token can outlive a redeploy/secret rotation. Remove it immediately
-    // so the next request can recover as an anonymous request or re-login.
-    if (res.status === 401 && appToken) localStorage.removeItem('noir_token');
     let message = text || res.statusText;
     let retryAfter: number | undefined;
     try {
@@ -51,6 +48,10 @@ export async function request<T = any>(path: string, opts: RequestOptions = {}):
       message = payload.error || payload.message || message;
       retryAfter = payload.retryAfter;
     } catch { /* response was plain text */ }
+    if (res.status === 401 && (message === 'Unauthorized' || message === 'Invalid token')) {
+      localStorage.removeItem('noir_token');
+      window.dispatchEvent(new Event('noir:unauthorized'));
+    }
     const error = new Error(`${res.status} ${message}`) as Error & { retryAfter?: number };
     error.retryAfter = retryAfter;
     throw error;
