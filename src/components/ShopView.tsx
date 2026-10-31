@@ -5,7 +5,7 @@ import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 import { Brand, Category, ProductGender } from '../types';
 
 export const ShopView: React.FC = () => {
-  const { products, isProductsLoading, searchQuery, setSearchQuery, activeCategory, setActiveCategory } = useStore();
+  const { products, isProductsLoading, searchQuery, setSearchQuery, activeCategory, setActiveCategory, locationPath } = useStore();
 
   const [selectedBrand, setSelectedBrand] = useState<string>('همه');
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
@@ -13,11 +13,12 @@ export const ShopView: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState<number>(100000000);
   const [selectedGender, setSelectedGender] = useState<ProductGender | 'همه'>('همه');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const brands = useMemo(() => ['همه', ...new Set(products.map(product => product.brand).filter(Boolean))], [products]);
 
   const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
-  const collectionBrand = window.location.pathname === '/collection/jordan' ? 'جردن' :
-    window.location.pathname === '/collection/nike' ? 'نایک' : null;
-  const womenCollection = window.location.pathname === '/collection/women';
+  const collectionBrand = locationPath === '/collection/jordan' ? 'جردن' :
+    locationPath === '/collection/nike' ? 'نایک' : null;
+  const womenCollection = locationPath === '/collection/women';
 
   const filtered = useMemo(() => {
     const matches = products.filter(product => {
@@ -83,7 +84,7 @@ export const ShopView: React.FC = () => {
             <span className="text-xs font-bold text-cyan-700">{mobileFiltersOpen ? 'بستن' : 'نمایش'}</span>
           </button>
           <div id="shop-filters" className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block bg-white rounded-3xl p-5 border border-cyan-100 shadow-sm space-y-6`}>
-          <div className="space-y-2"><label className="text-xs font-extrabold text-slate-700 block">جنسیت</label><div className="flex gap-1.5">{(['همه','مردانه','زنانه','یونیسکس'] as const).map(g => <button key={g} onClick={() => setSelectedGender(g)} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${selectedGender === g ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}>{g}</button>)}</div></div>
+          <div className="space-y-2 min-w-0"><label className="text-xs font-extrabold text-slate-700 block">جنسیت</label><div className="flex flex-wrap gap-1.5">{(['همه','مردانه','زنانه','یونیسکس'] as const).map(g => <button key={g} onClick={() => setSelectedGender(g)} className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold ${selectedGender === g ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}>{g}</button>)}</div></div>
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
               <Filter className="w-4 h-4 text-cyan-500" />
@@ -102,7 +103,7 @@ export const ShopView: React.FC = () => {
           <div className="space-y-2">
             <label className="text-xs font-extrabold text-slate-700 block">برند کفش</label>
             <div className="flex flex-wrap gap-1.5">
-              {['همه', 'نایک', 'جردن'].map(brand => (
+              {brands.map(brand => (
                 <button
                   key={brand}
                   onClick={() => setSelectedBrand(brand)}
@@ -122,7 +123,7 @@ export const ShopView: React.FC = () => {
           <div className="space-y-2">
             <label className="text-xs font-extrabold text-slate-700 block">دسته‌بندی کاربردی</label>
             <div className="flex flex-wrap gap-1.5">
-              {['همه', 'جردن', 'نایک', 'باشگاه', 'رانینگ', 'کلاسیک'].map(cat => (
+              {['همه', 'جردن', 'نایک', 'باشگاه', 'رانینگ', 'کلاسیک', 'ورزشی', 'روزمره', 'رسمی', 'طبی', 'بوت'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat as Category)}

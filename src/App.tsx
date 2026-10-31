@@ -22,14 +22,15 @@ const SeoPages = React.lazy(() => import('./components/SeoPages').then(module =>
 const MainContent: React.FC = () => {
   const {
     viewMode,
+    locationPath,
     selectedProduct,
     setSelectedProduct,
     isLoginModalOpen,
     isProfileModalOpen,
     isZarinpalModalOpen,
   } = useStore();
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
-  const isBrandCollection = path === '/collection/jordan' || path === '/collection/nike' || path === '/collection/women';
+  const path = locationPath.replace(/\/$/, '') || '/';
+  const isBrandCollection = path.startsWith('/collection/');
   const isProductPage = path.startsWith('/product/');
   const isSeoPage = !isBrandCollection && !isProductPage && path !== '/' && path !== '/shop' && path !== '/cart' && path !== '/profile' && path !== '/admin';
 

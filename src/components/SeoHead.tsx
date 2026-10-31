@@ -121,7 +121,7 @@ export const SeoHead: React.FC = () => {
             sameAs: ['https://www.instagram.com/avort.shoes/', 'https://www.tiktok.com/@avort.shoes'],
             contactPoint: {
               '@type': 'ContactPoint',
-              telephone: '+989374453927',
+              telephone: '+989382475438',
               contactType: 'customer service',
               availableLanguage: 'fa',
             },

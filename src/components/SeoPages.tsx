@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Instagram, MessageCircle, ShoppingBag } from 'lucide-react';
+import { Home, MessageCircle, ShoppingBag } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { seoArticles, type SeoArticle } from '../data/seoArticles';
 
-const WHATSAPP_URL = 'https://wa.me/989374453927';
-const INSTAGRAM_URL = 'https://www.instagram.com/avort.shoes/';
+const WHATSAPP_URL = 'https://wa.me/989382475438';
 
 type StaticPage = { title: string; intro: string; body: string };
 
@@ -17,7 +16,7 @@ const staticPages: Record<string, StaticPage> = {
   contact: {
     title: 'تماس با آورت',
     intro: 'برای پرسش درباره محصولات، انتخاب سایز یا پیگیری سفارش با پشتیبانی آورت در ارتباط باشید.',
-    body: 'برای دریافت راهنمایی، از طریق واتساپ یا صفحه اینستاگرام آورت پیام بفرستید. هنگام پیگیری سفارش، کد سفارش خود را آماده داشته باشید.',
+    body: 'ارتباط با پشتیبانی فقط از طریق واتساپ انجام می‌شود. هنگام پیگیری سفارش، کد سفارش خود را آماده داشته باشید.',
   },
   'purchase-rules': {
     title: 'شرایط خرید',
@@ -80,7 +79,7 @@ export const SeoPages: React.FC<{ path: string }> = ({ path }) => {
     <p className="mb-3 text-sm font-black text-cyan-600">آورت | راهنمای خرید کتانی</p><h1 className="text-2xl font-black text-slate-900 sm:text-4xl">{title}</h1><p className="mt-6 text-base font-bold leading-8 text-slate-700">{intro}</p>
     {article?.sections.map(section => <section className="mt-7" key={section.heading}><h2 className="text-lg font-black text-slate-900">{section.heading}</h2><p className="mt-2 whitespace-pre-line leading-8 text-slate-600">{section.body}</p></section>)}
     {!article && page?.body && <p className="mt-4 whitespace-pre-line leading-8 text-slate-600">{page.body}</p>}
-    {slug === 'contact' && <div className="mt-7 grid gap-3 sm:grid-cols-2"><a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white"><MessageCircle className="h-5 w-5" />واتساپ پشتیبانی</a><a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-rose-500 px-5 py-3 font-black text-white"><Instagram className="h-5 w-5" />اینستاگرام @avort.shoes</a></div>}
+    {slug === 'contact' && <div className="mt-7"><a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white"><MessageCircle className="h-5 w-5" />ارتباط فقط از طریق واتساپ · 09382475438</a></div>}
     {!article && !page && !isArticleIndex && !isLoadingArticle && <button onClick={() => setViewMode('home')} className="mt-6 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-white">بازگشت به صفحه اصلی</button>}
     <div className="mt-8 flex flex-wrap gap-3 border-t border-slate-100 pt-6"><button onClick={() => setViewMode('shop')} className="flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-white"><ShoppingBag className="h-4 w-4" />مشاهده محصولات</button><button onClick={() => setViewMode('home')} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black text-slate-700"><Home className="h-4 w-4" />بازگشت به خانه</button></div>
   </div>{(!article || isArticleIndex) && !isLoadingArticle && <section className="mt-6 rounded-2xl bg-white p-5"><h2 className="font-black">راهنماهای خرید و نگهداری کفش</h2><div className="mt-2 divide-y divide-slate-100">{[...seoArticles, ...longArticles].map(item => <a className="block py-3 text-sm font-bold text-cyan-700" href={`/articles/${item.slug}`} key={item.slug}><span>{item.title}</span><span className="mt-1 block font-normal leading-6 text-slate-500">{item.description}</span></a>)}</div></section>}</div></main>;

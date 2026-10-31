@@ -47,7 +47,7 @@ router.post('/', optionalUser, async (req, res) => {
 });
 
 router.get('/', requireUser, async (req, res) => {
-  let query = supabase.from('Order').select('*, items:OrderItem(*)').order('createdAt', { ascending: false });
+  let query = supabase.from('Order').select('*, items:OrderItem(id,productId,productName,productNameEn,brand,size,colorName,colorHex,withSpecialBox,specialBoxPrice,packagingLabel,priceToman,quantity)').order('createdAt', { ascending: false });
   if ((req as any).user.role !== 'ADMIN') {
     query = query.eq('userId', (req as any).user.sub).neq('status', 'PENDING_PAYMENT');
   }
@@ -59,7 +59,7 @@ router.get('/', requireUser, async (req, res) => {
 router.post('/:id/confirm', async (req, res) => {
   const trackingCode = String(req.body?.trackingCode || '');
   if (!trackingCode) return res.status(400).json({ error: 'کد پیگیری الزامی است' });
-  const { data, error } = await supabase.from('Order').update({ status: 'PAID' }).eq('id', req.params.id).eq('trackingCode', trackingCode).eq('status', 'PENDING_PAYMENT').select('*, items:OrderItem(*)').single();
+  const { data, error } = await supabase.from('Order').update({ status: 'PAID' }).eq('id', req.params.id).eq('trackingCode', trackingCode).eq('status', 'PENDING_PAYMENT').select('*, items:OrderItem(id,productId,productName,productNameEn,brand,size,colorName,colorHex,withSpecialBox,specialBoxPrice,packagingLabel,priceToman,quantity)').single();
   if (error || !data) return res.status(404).json({ error: 'سفارش پیدا نشد یا قابل تأیید نیست' });
   return res.json({ order: data });
 });
@@ -67,7 +67,7 @@ router.post('/:id/confirm', async (req, res) => {
 router.put('/:id', requireAdmin, async (req, res) => {
   const status = String(req.body?.status || '');
   if (!STATUSES.includes(status as any)) return res.status(400).json({ error: 'وضعیت سفارش نامعتبر است' });
-  const { data, error } = await supabase.from('Order').update({ status }).eq('id', req.params.id).select('*, items:OrderItem(*)').single();
+  const { data, error } = await supabase.from('Order').update({ status }).eq('id', req.params.id).select('id,status').single();
   if (error) return res.status(400).json({ error: error.message });
   return res.json({ order: data });
 });

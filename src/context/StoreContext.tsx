@@ -14,6 +14,7 @@ interface StoreContextType {
   user: User | null;
   isLoggedIn: boolean;
   viewMode: ViewMode;
+  locationPath: string;
   activeCategory: Category;
   searchQuery: string;
   selectedProduct: Product | null;
@@ -26,6 +27,7 @@ interface StoreContextType {
   // Actions
   setViewMode: (mode: ViewMode) => void;
   openBrandCollection: (brand: 'جردن' | 'نایک') => void;
+  openWomenCollection: () => void;
   setActiveCategory: (cat: Category) => void;
   setSearchQuery: (query: string) => void;
   setSelectedProduct: (p: Product | null) => void;
@@ -95,6 +97,7 @@ const getPathFromViewMode = (mode: ViewMode) => {
 
 const getViewModeFromPath = (path: string): ViewMode => {
   const normalized = path.replace(/\/$/, '') || '/';
+  if (normalized.startsWith('/collection/')) return 'shop';
 
   switch (normalized) {
     case '/shop': return 'shop';
@@ -129,8 +132,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const ordersLoadedForToken = useRef<string | null>(null);
 
   const [viewMode, setViewModeState] = useState<ViewMode>(() => getViewModeFromPath(window.location.pathname));
+  const [locationPath, setLocationPath] = useState(window.location.pathname);
   const [activeCategory, setActiveCategory] = useState<Category>('همه');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -199,6 +204,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const syncViewModeFromLocation = () => {
+      setLocationPath(window.location.pathname);
       const nextViewMode = getViewModeFromPath(window.location.pathname);
       setViewModeState(prev => (prev === nextViewMode ? prev : nextViewMode));
     };
@@ -227,6 +233,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSearchQuery('');
     setViewModeState('shop');
     const nextPath = `/collection/${slug}`;
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
+  const openWomenCollection = () => {
+    setActiveCategory('همه');
+    setSearchQuery('');
+    setViewModeState('shop');
+    const nextPath = '/collection/women';
     if (window.location.pathname !== nextPath) {
       window.history.pushState({}, '', nextPath);
       window.dispatchEvent(new PopStateEvent('popstate'));
@@ -273,11 +290,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     api.get('/cart')
       .then((res: any) => setCart(res.items || []))
       .catch(() => {});
-    api.get('/orders')
-      .then((res: any) => setOrders(res.orders || []))
-      .catch(() => {});
     return () => { active = false; };
   }, [token]);
+
+  useEffect(() => {
+    if (!token || (viewMode !== 'profile' && viewMode !== 'admin') || ordersLoadedForToken.current === token) return;
+    let active = true;
+    api.get('/orders')
+      .then((res: any) => {
+        if (!active) return;
+        setOrders(res.orders || []);
+        ordersLoadedForToken.current = token;
+      })
+      .catch(error => console.error('Order refresh failed:', error));
+    return () => { active = false; };
+  }, [token, viewMode]);
 
   // Actions
   const addToCart = async (product: Product, size: number, color: ShoeColor, quantity = 1, withSpecialBox = false) => {
@@ -444,7 +471,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const orderRes: any = await api.post('/orders', {
         receiverName, phone, city, address, postalCode,
         items: cart.map(item => ({
-          product: item.product,
+          product: { ...item.product, images: [] },
           selectedSize: item.selectedSize,
           selectedColor: item.selectedColor,
           withSpecialBox: item.withSpecialBox,
@@ -631,6 +658,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         user,
         isLoggedIn: !!user,
         viewMode,
+        locationPath,
         activeCategory,
         searchQuery,
         selectedProduct,
@@ -641,6 +669,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         pendingOrder,
         setViewMode,
         openBrandCollection,
+        openWomenCollection,
         setActiveCategory,
         setSearchQuery,
         setSelectedProduct: selectProduct,

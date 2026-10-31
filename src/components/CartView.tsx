@@ -23,6 +23,7 @@ export const CartView: React.FC = () => {
   const [address, setAddress] = useState<string>(activeAddress?.address || '');
   const [postalCode, setPostalCode] = useState<string>(activeAddress?.postalCode || '');
   const [selectedAddressId, setSelectedAddressId] = useState<string>(activeAddress?.id || '');
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export const CartView: React.FC = () => {
 
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingPayment) return;
     if (!receiverName || !phone || !city || !address || !postalCode) {
       alert('لطفا اطلاعات تحویل‌گیرنده و آدرس ارسال را تکمیل نمایید.');
       return;
@@ -75,7 +77,12 @@ export const CartView: React.FC = () => {
       addresses: [updatedAddress]
     });
 
-    await initiateCheckout(receiverName, phone, city, address, postalCode);
+    setIsSubmittingPayment(true);
+    try {
+      await initiateCheckout(receiverName, phone, city, address, postalCode);
+    } finally {
+      setIsSubmittingPayment(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -322,11 +329,12 @@ export const CartView: React.FC = () => {
 
             <button
               onClick={handleProceedToPayment}
-              disabled={hasUnavailableItems}
+              disabled={hasUnavailableItems || isSubmittingPayment}
+              aria-busy={isSubmittingPayment}
               className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 border border-amber-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
               <CreditCard className="w-5 h-5" />
-              <span>{hasUnavailableItems ? 'موجودی سبد خرید را اصلاح کنید' : 'پرداخت و ثبت سفارش'}</span>
+              <span>{hasUnavailableItems ? 'موجودی سبد خرید را اصلاح کنید' : isSubmittingPayment ? 'در حال اتصال به زرین‌پال…' : 'پرداخت با زرین‌پال'}</span>
             </button>
 
             {hasUnavailableItems && (

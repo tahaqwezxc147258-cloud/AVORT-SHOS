@@ -191,10 +191,11 @@ export const AdminPanel: React.FC = () => {
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
-    if (!isAdmin) return;
-    const timer = window.setInterval(() => { reloadOrders().catch(() => {}); }, 15000);
+    if (!isAdmin || activeTab !== 'orders') return;
+    reloadOrders().catch(() => {});
+    const timer = window.setInterval(() => { reloadOrders().catch(() => {}); }, 60000);
     return () => window.clearInterval(timer);
-  }, [isAdmin]);
+  }, [isAdmin, activeTab]);
 
   const reloadOrders = async () => {
     if (!isAdmin) return;
@@ -633,7 +634,7 @@ export const AdminPanel: React.FC = () => {
                 <div className="space-y-2 border-t border-slate-200 pt-3">
                   {(o.items || []).map((item, index) => (
                     <div key={`${o.id}-${item.productId}-${index}`} className="flex flex-wrap items-center gap-3 rounded-xl bg-white p-2 border border-slate-100">
-                      <img src={item.productImage} alt="" className="h-14 w-14 rounded-lg bg-slate-50 object-contain" />
+                      {item.productImage ? <img src={item.productImage} alt="" loading="lazy" className="h-14 w-14 rounded-lg bg-slate-50 object-contain" /> : <div className="h-14 w-14 rounded-lg bg-slate-100 text-slate-400 grid place-items-center"><ImageIcon className="h-5 w-5" /></div>}
                       <div className="min-w-[150px] flex-1"><p className="font-black text-slate-900">{item.productName}</p><p className="text-[10px] text-slate-500">{item.productNameEn || ''} · برند: {item.brand || '—'}</p></div>
                       <span className="rounded-lg bg-slate-100 px-2 py-1 font-black">سایز {item.size}</span>
                       <span className="flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 font-black"><i className="h-3 w-3 rounded-full border border-slate-300" style={{ backgroundColor: item.colorHex || '#cbd5e1' }} />{item.colorName}</span>
@@ -644,7 +645,7 @@ export const AdminPanel: React.FC = () => {
 
                 <div className="flex justify-between items-center pt-1 font-black text-sm text-slate-900">
                   <span>مبلغ فاکتور: {o.totalAmountToman.toLocaleString('fa-IR')} تومان</span>
-                  <span className="text-cyan-600 font-bold text-xs">روش پرداخت: {o.paymentMethod}</span>
+                  <span className="text-cyan-600 font-bold text-xs">روش پرداخت: {o.paymentMethod === 'زرین‌پال' || o.paymentMethod === 'ZARINPAL' ? 'پرداخت با زرین‌پال' : o.paymentMethod}</span>
                 </div>
               </div>
             ))}
@@ -684,15 +685,20 @@ export const AdminPanel: React.FC = () => {
 
             <div>
               <label className="block text-slate-700 mb-1">برند *</label>
-              <select
+              <input
+                type="text"
+                list="product-brand-options"
+                required
                 value={brand}
-                onChange={(e) => setBrand(e.target.value as Brand)}
+                onChange={(e) => setBrand(e.target.value)}
+                placeholder="نام برند را بنویسید یا انتخاب کنید"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900"
-              >
-                <option value="جردن">جردن</option>
-                <option value="نایک">نایک</option>
-                <option value="آدیداس">آدیداس</option>
-              </select>
+              />
+              <datalist id="product-brand-options">
+                {['نایک', 'جردن', 'آدیداس', 'پوما', 'کانورس', 'نیوبالانس', 'برشکا', 'New Balance', 'Bershka'].map(option => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
             </div>
 
             <div>
@@ -703,6 +709,11 @@ export const AdminPanel: React.FC = () => {
                 <option value="باشگاه">باشگاه</option>
                 <option value="کلاسیک">کلاسیک</option>
                 <option value="رانینگ">رانینگ</option>
+                <option value="ورزشی">ورزشی</option>
+                <option value="روزمره">روزمره</option>
+                <option value="رسمی">رسمی</option>
+                <option value="طبی">طبی</option>
+                <option value="بوت">بوت</option>
               </select>
             </div>
 
