@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { supabase } from '../db.js';
 import { requireUser } from '../middleware/auth.js';
 const router = Router(); router.use(requireUser);
@@ -47,7 +48,7 @@ router.post('/', async (req, res) => {
   let result;
   if (next <= 0) result = await supabase.from('CartItem').delete().eq('id', old.id);
   else if (old) result = await supabase.from('CartItem').update({ quantity: next }).eq('id', old.id);
-  else result = await supabase.from('CartItem').insert({ userId, productId: String(productId), quantity: next, selectedSize: size, colorName: String(colorName) });
+  else result = await supabase.from('CartItem').insert({ id: randomUUID(), userId, productId: String(productId), quantity: next, selectedSize: size, colorName: String(colorName) });
   if (result?.error) return res.status(400).json({ error: result.error.message });
   res.json({ ok: true });
 });

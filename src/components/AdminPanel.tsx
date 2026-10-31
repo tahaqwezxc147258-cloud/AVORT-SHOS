@@ -698,11 +698,11 @@ export const AdminPanel: React.FC = () => {
             <div>
               <label className="block text-slate-700 mb-1">دسته‌بندی محصول *</label>
               <select value={category} onChange={e => setCategory(e.target.value as Category)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900">
-                <option value="رانینگ">رانینگ</option>
                 <option value="جردن">جردن</option>
                 <option value="نایک">نایک</option>
                 <option value="باشگاه">باشگاه</option>
                 <option value="کلاسیک">کلاسیک</option>
+                <option value="رانینگ">رانینگ</option>
               </select>
             </div>
 

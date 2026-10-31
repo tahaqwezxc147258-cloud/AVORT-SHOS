@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ArrowRight } from 'lucide-react';
 import { Address } from '../types';
 
 export const CartView: React.FC = () => {
@@ -320,33 +320,13 @@ export const CartView: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-center border-t border-slate-100 pt-4">
-              <a
-                href="https://trustseal.enamad.ir/?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="مشاهده نماد اعتماد الکترونیکی"
-              >
-                <img
-                  referrerPolicy="origin"
-                  src="https://trustseal.enamad.ir/logo.aspx?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
-                  alt="نماد اعتماد الکترونیکی"
-                  width={72}
-                  height={72}
-                  loading="lazy"
-                  className="h-[72px] w-[72px] object-contain"
-                />
-              </a>
-            </div>
-
-            {/* Payment Button leading to Zarinpal Gateway */}
             <button
               onClick={handleProceedToPayment}
               disabled={hasUnavailableItems}
               className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 border border-amber-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
               <CreditCard className="w-5 h-5" />
-              <span>{hasUnavailableItems ? 'موجودی سبد خرید را اصلاح کنید' : 'پرداخت آنلاین از طریق درگاه زرین‌پال'}</span>
+              <span>{hasUnavailableItems ? 'موجودی سبد خرید را اصلاح کنید' : 'پرداخت و ثبت سفارش'}</span>
             </button>
 
             {hasUnavailableItems && (
@@ -354,13 +334,6 @@ export const CartView: React.FC = () => {
                 یک یا چند محصول سبد خرید ناموجود شده یا تعداد آن از موجودی بیشتر است؛ برای ادامه، آن‌ها را حذف یا تعدادشان را اصلاح کنید.
               </p>
             )}
-
-            <div className="bg-cyan-50 border border-cyan-100 rounded-2xl p-3 flex items-start gap-2.5 text-cyan-800 text-[11px]">
-              <ShieldCheck className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
-              <p>
-                پرداخت شما به صورت امن از طریق شبکه شتاب زرین‌پال انجام می‌شود و سفارش بلافاصله آماده ارسال خواهد شد.
-              </p>
-            </div>
 
           </div>
 

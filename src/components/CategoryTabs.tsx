@@ -3,7 +3,7 @@ import { Category } from '../types';
 import { useStore } from '../context/StoreContext';
 import { Search } from 'lucide-react';
 
-const CATEGORIES: Category[] = ['همه', 'جردن', 'نایک'];
+const CATEGORIES: Array<Category | 'زنانه'> = ['همه', 'زنانه', 'جردن', 'نایک', 'رانینگ'];
 
 export const CategoryTabs: React.FC = () => {
   const { activeCategory, setActiveCategory, searchQuery, setSearchQuery, setViewMode } = useStore();
@@ -46,14 +46,20 @@ export const CategoryTabs: React.FC = () => {
 
       {/* Category Tabs Scroll Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-        <button onClick={() => { window.history.pushState({}, '', '/collection/women'); window.dispatchEvent(new PopStateEvent('popstate')); setViewMode('shop'); }} className="px-5 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 bg-white text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 border border-slate-100">زنانه</button>
         {CATEGORIES.map((cat) => {
-          const isActive = activeCategory === cat;
+          const isWomen = cat === 'زنانه';
+          const isActive = !isWomen && activeCategory === cat;
           return (
             <button
               key={cat}
               onClick={() => {
-                setActiveCategory(cat);
+                if (isWomen) {
+                  window.history.pushState({}, '', '/collection/women');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                  setActiveCategory('همه');
+                } else {
+                  setActiveCategory(cat);
+                }
                 setSearchQuery('');
                 setViewMode('shop');
               }}

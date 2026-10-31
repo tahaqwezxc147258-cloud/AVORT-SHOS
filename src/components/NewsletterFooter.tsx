@@ -38,24 +38,6 @@ export const NewsletterFooter: React.FC = () => {
         </div>
 
         <div className="text-center text-xs text-slate-400 pt-4 border-t border-slate-100">فروشگاه آنلاین کتونی آورت © ۲۰۲۶ - تمامی حقوق محفوظ است.</div>
-        <div className="flex justify-center pt-4">
-          <a
-            href="https://trustseal.enamad.ir/?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="مشاهده نماد اعتماد الکترونیکی"
-          >
-            <img
-              referrerPolicy="origin"
-              src="https://trustseal.enamad.ir/logo.aspx?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
-              alt="نماد اعتماد الکترونیکی"
-              width={72}
-              height={72}
-              loading="lazy"
-              className="h-[72px] w-[72px] object-contain"
-            />
-          </a>
-        </div>
       </div>
     </footer>
   );
