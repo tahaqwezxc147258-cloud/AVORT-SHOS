@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShoeCard } from './ShoeCard';
 import { Flame } from 'lucide-react';
@@ -6,13 +6,13 @@ import { Flame } from 'lucide-react';
 export const PopularProducts: React.FC = () => {
   const { products, isProductsLoading, activeCategory, searchQuery } = useStore();
 
-  const filteredProducts = products.filter(p => {
-    const matchesCategory = activeCategory === 'همه' || p.category === activeCategory || p.brand === activeCategory;
-    const matchesSearch = !searchQuery || 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      p.nameFa.includes(searchQuery);
+  const filteredProducts = useMemo(() => products.filter(product => {
+    const matchesCategory = activeCategory === 'همه' || product.category === activeCategory || product.brand === activeCategory;
+    const matchesSearch = !searchQuery ||
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.nameFa.includes(searchQuery);
     return matchesCategory && matchesSearch;
-  });
+  }), [products, activeCategory, searchQuery]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-6">

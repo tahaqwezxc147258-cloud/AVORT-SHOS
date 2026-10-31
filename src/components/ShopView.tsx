@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ShoeCard } from './ShoeCard';
 import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
@@ -19,32 +19,30 @@ export const ShopView: React.FC = () => {
     window.location.pathname === '/collection/nike' ? 'نایک' : null;
   const womenCollection = window.location.pathname === '/collection/women';
 
-  // Filtering Logic
-  let filtered = products.filter(p => {
-    const matchesSearch = !searchQuery || 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      p.nameFa.includes(searchQuery);
-    
-    const matchesBrand = collectionBrand
-      ? p.brand === collectionBrand || p.category === collectionBrand
-      : selectedBrand === 'همه' || p.brand === selectedBrand;
-    const matchesCategory = collectionBrand || activeCategory === 'همه' || p.category === activeCategory ||
-      (activeCategory === 'باشگاه' && p.category === 'باشگاهی') ||
-      ((activeCategory === 'جردن' || activeCategory === 'نایک') && p.brand === activeCategory);
-    const matchesGender = womenCollection ? p.gender === 'زنانه' : selectedGender === 'همه' || p.gender === selectedGender;
-    const matchesSize = selectedSize === null || p.sizes.includes(selectedSize);
-    const matchesPrice = p.priceToman <= maxPrice;
+  const filtered = useMemo(() => {
+    const matches = products.filter(product => {
+      const matchesSearch = !searchQuery ||
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.nameFa.includes(searchQuery);
+      const matchesBrand = collectionBrand
+        ? product.brand === collectionBrand || product.category === collectionBrand
+        : selectedBrand === 'همه' || product.brand === selectedBrand;
+      const matchesCategory = collectionBrand || activeCategory === 'همه' || product.category === activeCategory ||
+        (activeCategory === 'باشگاه' && product.category === 'باشگاهی') ||
+        ((activeCategory === 'جردن' || activeCategory === 'نایک') && product.brand === activeCategory);
+      const matchesGender = womenCollection ? product.gender === 'زنانه' : selectedGender === 'همه' || product.gender === selectedGender;
+      const matchesSize = selectedSize === null || product.sizes.includes(selectedSize);
+      const matchesPrice = product.priceToman <= maxPrice;
+      return matchesSearch && matchesBrand && matchesCategory && matchesGender && matchesSize && matchesPrice;
+    });
 
-    return matchesSearch && matchesBrand && matchesCategory && matchesGender && matchesSize && matchesPrice;
-  });
-
-  // Sorting
-  filtered = [...filtered].sort((a, b) => {
-    if (sortBy === 'price-asc') return a.priceToman - b.priceToman;
-    if (sortBy === 'price-desc') return b.priceToman - a.priceToman;
-    if (sortBy === 'rating') return b.rating - a.rating;
-    return (b.reviewsCount || 0) - (a.reviewsCount || 0); // popular
-  });
+    return matches.sort((a, b) => {
+      if (sortBy === 'price-asc') return a.priceToman - b.priceToman;
+      if (sortBy === 'price-desc') return b.priceToman - a.priceToman;
+      if (sortBy === 'rating') return b.rating - a.rating;
+      return (b.reviewsCount || 0) - (a.reviewsCount || 0);
+    });
+  }, [products, searchQuery, collectionBrand, selectedBrand, activeCategory, womenCollection, selectedGender, selectedSize, maxPrice, sortBy]);
 
   const resetFilters = () => {
     setSelectedBrand('همه');
@@ -62,9 +60,9 @@ export const ShopView: React.FC = () => {
       <div className="bg-gradient-to-r from-slate-900 to-cyan-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
         <div className="relative z-10 space-y-2">
           <span className="text-xs font-bold text-cyan-400">کاتالوگ جامع اِی‌وُرت</span>
-          <h1 className="text-2xl sm:text-4xl font-black">فروشگاه اختصاصی کفش نایک و جردن</h1>
+          <h1 className="text-2xl sm:text-4xl font-black">فروشگاه نایک و جردن | رانینگ، روزمره و کلاسیک</h1>
           <p className="text-xs sm:text-sm text-slate-300">
-            تضمین اصالت کالا، بهترین قیمت بازار و ارسال سریع به سراسر کشور
+            مدل‌های رانینگ و روزمره؛ مشخصات، رنگ و سایزها را بررسی و آنلاین سفارش دهید.
           </p>
         </div>
       </div>
@@ -185,7 +183,12 @@ export const ShopView: React.FC = () => {
           {/* Sorting Header Bar */}
           <div className="bg-white rounded-2xl p-4 border border-cyan-100 shadow-xs flex flex-wrap items-center justify-between gap-4">
             <span className="text-xs font-bold text-slate-600">
-              نمایش <span className="text-cyan-600 font-extrabold">{filtered.length}</span> کتانی موجود
+              نمایش <span className="text-cyan-600 font-extrabold">{filtered.length}</span> محصول
+              {filtered.some(product => !product.inStock || product.stockCount < 1) && (
+                <span className="mr-2 text-slate-500">
+                  ({filtered.filter(product => !product.inStock || product.stockCount < 1).length.toLocaleString('fa-IR')} ناموجود)
+                </span>
+              )}
             </span>
 
             <div className="flex items-center gap-2 text-xs font-bold">

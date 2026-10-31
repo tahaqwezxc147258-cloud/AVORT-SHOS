@@ -67,6 +67,20 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
+const PRODUCT_CACHE_KEY = 'noir_products';
+
+const readCachedProducts = (): Product[] => {
+  try {
+    const cached = localStorage.getItem(PRODUCT_CACHE_KEY);
+    if (!cached) return [];
+    const parsed: unknown = JSON.parse(cached);
+    if (Array.isArray(parsed)) return parsed as Product[];
+    console.warn('Cached products have an invalid format.');
+  } catch (error) {
+    console.warn('Could not read cached products:', error);
+  }
+  return [];
+};
 
 const getPathFromViewMode = (mode: ViewMode) => {
   switch (mode) {
@@ -93,9 +107,10 @@ const getViewModeFromPath = (path: string): ViewMode => {
 };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(readCachedProducts);
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [isProductsLoading, setIsProductsLoading] = useState(true);
+  const [isProductsLoading, setIsProductsLoading] = useState(() => products.length === 0);
+  const productsLoaded = useRef(false);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('noir_token'));
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('noir_user');
@@ -158,6 +173,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [user]);
 
   useEffect(() => {
+    if (!productsLoaded.current) return;
+    try {
+      const serialized = JSON.stringify(products);
+      if (serialized.length > 1_500_000) {
+        localStorage.removeItem(PRODUCT_CACHE_KEY);
+        console.warn('Product cache was skipped because it exceeds the safe browser storage size.');
+        return;
+      }
+      localStorage.setItem(PRODUCT_CACHE_KEY, serialized);
+    } catch (error) {
+      console.warn('Could not cache products:', error);
+    }
+  }, [products]);
+
+  useEffect(() => {
     const handleUnauthorized = () => {
       setToken(null);
       setUser(null);
@@ -210,6 +240,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .then((res: any) => {
         if (!mounted) return;
         const loadedProducts = res.products || [];
+        productsLoaded.current = true;
         setProducts(loadedProducts);
         const match = window.location.pathname.match(/^\/product\/([^/]+)/);
         if (match) {
@@ -217,8 +248,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (product) setSelectedProduct(product);
         }
       })
-      .catch(() => {
-        setProducts(INITIAL_PRODUCTS);
+      .catch(error => {
+        console.error('Product refresh failed:', error);
+        productsLoaded.current = true;
+        if (products.length === 0) setProducts(INITIAL_PRODUCTS);
       })
       .finally(() => {
         if (mounted) setIsProductsLoading(false);
@@ -248,81 +281,114 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Actions
   const addToCart = async (product: Product, size: number, color: ShoeColor, quantity = 1, withSpecialBox = false) => {
+    const availableStock = Math.max(0, Number(product.stockCount) || 0);
+    const existing = cart.find(item =>
+      item.product.id === product.id &&
+      item.selectedSize === size &&
+      item.selectedColor.name === color.name
+    );
+    if (!product.inStock || availableStock < 1 || (existing?.quantity || 0) + quantity > availableStock) {
+      alert(!product.inStock || availableStock < 1
+        ? 'این محصول موجود نیست و امکان سفارش آن وجود ندارد.'
+        : 'تعداد انتخاب‌شده بیشتر از موجودی محصول است.');
+      return;
+    }
+
     const specialBoxPrice = withSpecialBox && product.specialBoxAvailable ? (product.specialBoxPrice || 350000) : 0;
+    setCart(prev => {
+      const existingIndex = prev.findIndex(
+        item => item.product.id === product.id && item.selectedSize === size && item.selectedColor.name === color.name
+      );
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + quantity, withSpecialBox, specialBoxPrice };
+        return updated;
+      }
+      return [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }];
+    });
+
     if (token) {
       try {
-        const res = await api.post('/cart', { productId: product.id, quantity, selectedSize: size, colorName: color.name, withSpecialBox });
-        const latest: any = await api.get('/cart');
-        setCart(latest.items || []);
-      } catch {
-        // fallback to client-side
-        setCart(prev => [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }]);
-      }
-    } else {
-      setCart(prev => {
-        const existingIndex = prev.findIndex(
-          item => item.product.id === product.id && item.selectedSize === size && item.selectedColor.name === color.name
-        );
-        if (existingIndex > -1) {
-          const updated = [...prev];
-          updated[existingIndex].quantity += quantity;
-          return updated;
-        } else {
-          return [...prev, { product, selectedSize: size, selectedColor: color, quantity, withSpecialBox, specialBoxPrice }];
+        await api.post('/cart', { productId: product.id, quantity, selectedSize: size, colorName: color.name, withSpecialBox });
+      } catch (error) {
+        console.error('Adding product to cart failed:', error);
+        try {
+          const latest: any = await api.get('/cart');
+          setCart(latest.items || []);
+        } catch (refreshError) {
+          console.error('Cart refresh failed:', refreshError);
         }
-      });
+        alert(`افزودن محصول به سبد خرید انجام نشد: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
+      }
     }
   };
 
   const removeFromCart = async (productId: string, size: number, colorName: string) => {
-    if (token) {
-      try {
-        await api.del(`/cart/${productId}`);
-        const res = await api.get('/cart');
-        setCart(res.items || []);
-        return;
-      } catch {
-        // fallback
-      }
-    }
     setCart(prev => prev.filter(
       item => !(item.product.id === productId && item.selectedSize === size && item.selectedColor.name === colorName)
     ));
+    if (token) {
+      try {
+        await api.del(`/cart/${productId}`, { selectedSize: size, colorName });
+      } catch (error) {
+        console.error('Removing cart item failed:', error);
+        try {
+          const latest: any = await api.get('/cart');
+          setCart(latest.items || []);
+        } catch (refreshError) {
+          console.error('Cart refresh failed:', refreshError);
+        }
+        alert(`حذف محصول از سبد خرید انجام نشد: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
+      }
+    }
   };
 
   const updateCartQuantity = async (productId: string, size: number, colorName: string, delta: number) => {
+    const item = cart.find(entry => entry.product.id === productId && entry.selectedSize === size && entry.selectedColor.name === colorName);
+    if (!item) return;
+    const nextQuantity = item.quantity + delta;
+    const availableStock = Math.max(0, Number(item.product.stockCount) || 0);
+    if (nextQuantity > availableStock) {
+      alert('تعداد انتخاب‌شده بیشتر از موجودی محصول است.');
+      return;
+    }
+    setCart(prev => prev.flatMap(entry => {
+      if (entry.product.id !== productId || entry.selectedSize !== size || entry.selectedColor.name !== colorName) return [entry];
+      return nextQuantity > 0 ? [{ ...entry, quantity: nextQuantity }] : [];
+    }));
+
     if (token) {
       try {
-        // naive: set quantity by sending quantity delta; backend replaces quantity
-        const item = cart.find(entry => entry.product.id === productId && entry.selectedSize === size && entry.selectedColor.name === colorName);
-        await api.post('/cart', { productId, quantity: delta, selectedSize: size, colorName, currentQuantity: item?.quantity });
-        const latest: any = await api.get('/cart');
-        setCart(latest.items || []);
-        return;
-      } catch {
-        // fallback
+        await api.post('/cart', { productId, quantity: delta, selectedSize: size, colorName });
+      } catch (error) {
+        console.error('Updating cart quantity failed:', error);
+        try {
+          const latest: any = await api.get('/cart');
+          setCart(latest.items || []);
+        } catch (refreshError) {
+          console.error('Cart refresh failed:', refreshError);
+        }
+        alert(`به‌روزرسانی تعداد محصول انجام نشد: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
       }
     }
-    setCart(prev => {
-      return prev.map(item => {
-        if (item.product.id === productId && item.selectedSize === size && item.selectedColor.name === colorName) {
-          const newQty = item.quantity + delta;
-          return newQty > 0 ? { ...item, quantity: newQty } : item;
-        }
-        return item;
-      });
-    });
   };
 
   const clearCart = async () => {
+    setCart([]);
     if (token) {
       try {
         await api.del('/cart');
-        setCart([]);
-        return;
-      } catch {}
+      } catch (error) {
+        console.error('Clearing cart failed:', error);
+        try {
+          const latest: any = await api.get('/cart');
+          setCart(latest.items || []);
+        } catch (refreshError) {
+          console.error('Cart refresh failed:', refreshError);
+        }
+        alert(`خالی‌کردن سبد خرید انجام نشد: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
+      }
     }
-    setCart([]);
   };
 
   const toggleWishlist = (productId: string) => {
@@ -374,10 +440,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const initiateCheckout = async (receiverName: string, phone: string, city: string, address: string, postalCode: string): Promise<Order | null> => {
     if (cart.length === 0) return null;
 
-      const subtotal = cart.reduce((sum, item) => sum + ((item.product.priceToman + (item.withSpecialBox ? (item.product.specialBoxPrice || 350000) : 0)) * item.quantity), 0);
-    const shippingFee = subtotal >= 10000000 ? 0 : 85000;
-
-    // Create every order on the server so the admin CRM can see member and guest orders.
     try {
       const orderRes: any = await api.post('/orders', {
         receiverName, phone, city, address, postalCode,
@@ -390,14 +452,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })),
       });
       const order = orderRes.order || orderRes;
-      if (true) {
-        const payRes: any = await api.post('/payments/create', { orderId: order.id });
-        if (!payRes?.paymentUrl || payRes.orderId !== order.id) throw new Error('Payment session could not be created');
-        window.location.assign(payRes.paymentUrl);
-        return order;
-      }
-      setPendingOrder(order);
-      setIsZarinpalModalOpen(true);
+      const payRes: any = await api.post('/payments/create', { orderId: order.id });
+      if (!payRes?.paymentUrl || payRes.orderId !== order.id) throw new Error('Payment session could not be created');
+      window.location.assign(payRes.paymentUrl);
       return order;
     } catch (e) {
       console.error('Checkout error:', e);
@@ -405,56 +462,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       alert(`پرداخت انجام نشد: ${message}`);
       return null;
     }
-
-    /* Legacy local fallback for offline/demo mode. */
-    if (token) {
-      try {
-        // create order on server (server uses server-side cart)
-        const orderRes: any = await api.post('/orders', { receiverName, phone, city, address, postalCode });
-        const order = orderRes.order || orderRes;
-
-        // create payment
-        const payRes: any = await api.post('/payments/create', { orderId: order.id });
-        if (!payRes?.paymentUrl || payRes.orderId !== order.id) throw new Error('Payment session could not be created');
-        window.location.assign(payRes.paymentUrl);
-        return order;
-        setPendingOrder(order);
-        setIsZarinpalModalOpen(true);
-        return order;
-      } catch (e) {
-        console.error('Checkout error', e);
-      }
-      return null;
-    }
-
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      trackingCode: `AVORI-${Date.now().toString().slice(-7)}`,
-      userId: user?.id || 'guest',
-      customerName: receiverName,
-      customerPhone: phone,
-      city,
-      postalCode,
-      shippingAddress: `${city}، ${address} (کدپستی: ${postalCode})`,
-      items: cart.map(item => ({
-        productId: item.product.id,
-        productName: item.product.nameFa,
-        productImage: item.product.images[0],
-        size: item.selectedSize,
-        colorName: item.selectedColor.name,
-        priceToman: item.product.priceToman,
-        quantity: item.quantity
-      })),
-      totalAmountToman: subtotal + shippingFee,
-      shippingFeeToman: shippingFee,
-      status: 'PENDING_PAYMENT',
-      createdAt: new Date().toLocaleDateString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-      paymentMethod: 'زرین‌پال'
-    };
-
-    setPendingOrder(newOrder);
-    setIsZarinpalModalOpen(true);
-    return newOrder;
   };
 
   const completeZarinpalPayment = async (orderId: string, success: boolean): Promise<boolean> => {
@@ -611,7 +618,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // exposed auth helpers
-  const loginWithPhone = requestOtp;
+  const loginWithPhone = async (phone: string): Promise<boolean> => (await requestOtp(phone)).success;
 
   return (
     <StoreContext.Provider
@@ -629,6 +636,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         selectedProduct,
         orders,
         isLoginModalOpen,
+        isProfileModalOpen,
         isZarinpalModalOpen,
         pendingOrder,
         setViewMode,

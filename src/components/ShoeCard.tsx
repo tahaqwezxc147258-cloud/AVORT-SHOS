@@ -11,9 +11,16 @@ interface ShoeCardProps {
 export const ShoeCard: React.FC<ShoeCardProps> = ({ product, badge }) => {
   const { toggleWishlist, isWishlisted, setSelectedProduct, addToCart } = useStore();
   const wishlisted = isWishlisted(product.id);
+  const isAvailable = product.inStock && product.stockCount > 0;
+  const hasOrderOptions = product.sizes.length > 0 && product.colors.length > 0;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAvailable) return;
+    if (!product.sizes.length || !product.colors.length) {
+      setSelectedProduct(product);
+      return;
+    }
     addToCart(product, product.sizes[0] || 42, product.colors[0], 1);
   };
 
@@ -63,9 +70,15 @@ export const ShoeCard: React.FC<ShoeCardProps> = ({ product, badge }) => {
           src={product.images[0]}
           alt={product.nameFa}
           onClick={() => setSelectedProduct(product)}
-          className="relative w-full max-w-[200px] h-36 object-contain filter drop-shadow-[0_15px_15px_rgba(14,116,144,0.3)] transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6"
+          className={`relative w-full max-w-[200px] h-36 object-contain filter drop-shadow-[0_15px_15px_rgba(14,116,144,0.3)] transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6 ${isAvailable ? '' : 'grayscale opacity-50'}`}
           loading="lazy"
+          decoding="async"
         />
+        {!isAvailable && (
+          <span className="absolute inset-x-0 bottom-2 mx-auto w-fit rounded-full border border-slate-300 bg-white/95 px-3 py-1 text-xs font-black text-slate-700 shadow-sm">
+            اتمام موجودی
+          </span>
+        )}
       </div>
 
       {/* Product Details & Actions */}
@@ -88,10 +101,15 @@ export const ShoeCard: React.FC<ShoeCardProps> = ({ product, badge }) => {
         <div className="pt-2 flex items-center gap-2">
           <button
             onClick={handleQuickAdd}
-            className="flex-1 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white py-2 px-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all"
+            disabled={!isAvailable}
+            className={`flex-1 py-2 px-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+              isAvailable
+                ? 'bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white shadow-md shadow-cyan-500/20'
+                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+            }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>افزودن سریع</span>
+            {isAvailable && <ShoppingBag className="w-3.5 h-3.5" />}
+            <span>{!isAvailable ? 'ناموجود' : hasOrderOptions ? 'افزودن سریع' : 'انتخاب گزینه‌ها'}</span>
           </button>
 
           <button

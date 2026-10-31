@@ -33,7 +33,7 @@ router.put('/', requireUser, async (req, res) => {
 });
 
 const addressPayload = (body: any) => ({
-  title: String(body?.title || '????').trim(),
+  title: String(body?.title || 'آدرس من').trim(),
   receiverName: String(body?.receiverName || '').trim(),
   phone: String(body?.phone || '').trim(),
   city: String(body?.city || '').trim(),
@@ -46,7 +46,7 @@ const isComplete = (address: ReturnType<typeof addressPayload>) => Boolean(addre
 router.post('/addresses', requireUser, async (req, res) => {
   const userId = userIdFrom(req);
   const address = addressPayload(req.body);
-  if (!isComplete(address)) return res.status(400).json({ error: '??????? ???? ???? ????' });
+  if (!isComplete(address)) return res.status(400).json({ error: 'اطلاعات آدرس کامل نیست' });
   if (address.isDefault) await supabase.from('Address').update({ isDefault: false }).eq('userId', userId);
   const { error } = await supabase.from('Address').insert({ id: randomUUID(), userId, ...address });
   if (error) return res.status(400).json({ error: error.message });
@@ -57,7 +57,7 @@ router.post('/addresses', requireUser, async (req, res) => {
 router.put('/addresses/:id', requireUser, async (req, res) => {
   const userId = userIdFrom(req);
   const address = addressPayload(req.body);
-  if (!isComplete(address)) return res.status(400).json({ error: '??????? ???? ???? ????' });
+  if (!isComplete(address)) return res.status(400).json({ error: 'اطلاعات آدرس کامل نیست' });
   if (address.isDefault) await supabase.from('Address').update({ isDefault: false }).eq('userId', userId);
   const { error } = await supabase.from('Address').update(address).eq('id', req.params.id).eq('userId', userId);
   if (error) return res.status(400).json({ error: error.message });

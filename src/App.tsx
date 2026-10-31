@@ -5,21 +5,29 @@ import { HeroSection } from './components/HeroSection';
 import { CategoryTabs } from './components/CategoryTabs';
 import { PopularProducts } from './components/PopularProducts';
 import { ShopView } from './components/ShopView';
-import { CartView } from './components/CartView';
-import { AdminPanel } from './components/AdminPanel';
-import { ProductDetailModal } from './components/ProductDetailModal';
-import { LoginModal } from './components/LoginModal';
-import { ProfileModal } from './components/ProfileModal';
-import { ZarinpalGatewayModal } from './components/ZarinpalGatewayModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { NewsletterFooter } from './components/NewsletterFooter';
-import { ProfileView } from './components/ProfileView';
 import { SeoHead } from './components/SeoHead';
 import { SeoContent } from './components/SeoContent';
-import { SeoPages } from './components/SeoPages';
+
+const CartView = React.lazy(() => import('./components/CartView').then(module => ({ default: module.CartView })));
+const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(module => ({ default: module.AdminPanel })));
+const ProductDetailModal = React.lazy(() => import('./components/ProductDetailModal').then(module => ({ default: module.ProductDetailModal })));
+const LoginModal = React.lazy(() => import('./components/LoginModal').then(module => ({ default: module.LoginModal })));
+const ProfileModal = React.lazy(() => import('./components/ProfileModal').then(module => ({ default: module.ProfileModal })));
+const ZarinpalGatewayModal = React.lazy(() => import('./components/ZarinpalGatewayModal').then(module => ({ default: module.ZarinpalGatewayModal })));
+const ProfileView = React.lazy(() => import('./components/ProfileView').then(module => ({ default: module.ProfileView })));
+const SeoPages = React.lazy(() => import('./components/SeoPages').then(module => ({ default: module.SeoPages })));
 
 const MainContent: React.FC = () => {
-  const { viewMode, selectedProduct, setSelectedProduct } = useStore();
+  const {
+    viewMode,
+    selectedProduct,
+    setSelectedProduct,
+    isLoginModalOpen,
+    isProfileModalOpen,
+    isZarinpalModalOpen,
+  } = useStore();
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const isBrandCollection = path === '/collection/jordan' || path === '/collection/nike' || path === '/collection/women';
   const isProductPage = path.startsWith('/product/');
@@ -69,9 +77,9 @@ const MainContent: React.FC = () => {
         />
       )}
 
-      <LoginModal />
-      <ProfileModal />
-      <ZarinpalGatewayModal />
+      {isLoginModalOpen && <LoginModal />}
+      {isProfileModalOpen && <ProfileModal />}
+      {isZarinpalModalOpen && <ZarinpalGatewayModal />}
     </div>
   );
 };
@@ -79,7 +87,9 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <StoreProvider>
-      <MainContent />
+      <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 rounded-full border-4 border-cyan-100 border-t-cyan-500 animate-spin" /></div>}>
+        <MainContent />
+      </React.Suspense>
     </StoreProvider>
   );
 }

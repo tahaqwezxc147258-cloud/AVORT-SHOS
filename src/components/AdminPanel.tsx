@@ -21,13 +21,14 @@ export const AdminPanel: React.FC = () => {
   const [name, setName] = useState('');
   const [nameFa, setNameFa] = useState('');
   const [brand, setBrand] = useState<Brand>('جردن');
-  const [category, setCategory] = useState<Category>('جردن');
+  const [category, setCategory] = useState<Category>('رانینگ');
   const [gender, setGender] = useState<ProductGender>('یونیسکس');
   const [subtitle, setSubtitle] = useState('کتانی تخصصی و اورجینال');
   const [priceToman, setPriceToman] = useState<number>(11000000);
   const [imageUrls, setImageUrls] = useState('');
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [stockCount, setStockCount] = useState<number>(10);
   const [isHeroFeatured, setIsHeroFeatured] = useState(false);
   const [description, setDescription] = useState('طراحی رترو با چرم طبیعی درجه یک و بالشتک Nike Air...');
@@ -58,7 +59,7 @@ export const AdminPanel: React.FC = () => {
         const canvas = document.createElement('canvas');
         // Vercel serverless requests have a small payload limit. Do not send
         // original camera-sized images as base64 in the product JSON.
-        const maxDimension = 1400;
+        const maxDimension = 1200;
         const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
         canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
         canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -67,24 +68,49 @@ export const AdminPanel: React.FC = () => {
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
         const { data, width, height } = pixels;
-        const visited = new Uint8Array(width * height);
-        const queue: number[] = [];
-        for (let x = 0; x < width; x += 1) queue.push(x, (height - 1) * width + x);
-        for (let y = 1; y < height - 1; y += 1) queue.push(y * width, y * width + width - 1);
-        const isBackground = (index: number) => data[index * 4 + 3] > 0 && data[index * 4] > 238 && data[index * 4 + 1] > 238 && data[index * 4 + 2] > 238;
-        while (queue.length) {
-          const index = queue.pop() as number;
-          if (index < 0 || index >= width * height || visited[index] || !isBackground(index)) continue;
+        const pixelCount = width * height;
+        const visited = new Uint8Array(pixelCount);
+        const queue = new Uint32Array(pixelCount);
+        let queueEnd = 0;
+        const enqueueBackground = (index: number) => {
+          if (visited[index]) return;
           visited[index] = 1;
-          data[index * 4 + 3] = 0;
+          const pixel = index * 4;
+          if (data[pixel + 3] > 0 && data[pixel] > 238 && data[pixel + 1] > 238 && data[pixel + 2] > 238) {
+            data[pixel + 3] = 0;
+            queue[queueEnd++] = index;
+          }
+        };
+        for (let x = 0; x < width; x += 1) {
+          enqueueBackground(x);
+          enqueueBackground((height - 1) * width + x);
+        }
+        for (let y = 1; y < height - 1; y += 1) {
+          enqueueBackground(y * width);
+          enqueueBackground(y * width + width - 1);
+        }
+        for (let cursor = 0; cursor < queueEnd; cursor += 1) {
+          const index = queue[cursor];
           const x = index % width;
-          if (x > 0) queue.push(index - 1);
-          if (x < width - 1) queue.push(index + 1);
-          if (index >= width) queue.push(index - width);
-          if (index < width * (height - 1)) queue.push(index + width);
+          if (x > 0) enqueueBackground(index - 1);
+          if (x < width - 1) enqueueBackground(index + 1);
+          if (index >= width) enqueueBackground(index - width);
+          if (index < pixelCount - width) enqueueBackground(index + width);
         }
         context.putImageData(pixels, 0, 0);
-        resolve(canvas.toDataURL('image/webp', 0.82));
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('فشرده‌سازی تصویر انجام نشد'));
+            return;
+          }
+          const compressedReader = new FileReader();
+          compressedReader.onload = () => {
+            if (typeof compressedReader.result === 'string') resolve(compressedReader.result);
+            else reject(new Error('خواندن تصویر فشرده‌شده انجام نشد'));
+          };
+          compressedReader.onerror = () => reject(new Error('خواندن تصویر فشرده‌شده انجام نشد'));
+          compressedReader.readAsDataURL(blob);
+        }, 'image/webp', 0.76);
       };
       image.onerror = () => resolve(reader.result as string);
       image.src = reader.result as string;
@@ -213,16 +239,18 @@ export const AdminPanel: React.FC = () => {
 
   const handleAddProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingProduct) return;
     if (!name || !nameFa || !priceToman || productImageUrls.length === 0) {
       alert('لطفا نام، قیمت و حداقل یک تصویر محصول را وارد کنید.');
       return;
     }
 
-    const finalImages = selectedImageFiles.length > 0
-      ? await Promise.all(selectedImageFiles.map(fileToDataUrl))
-      : productImageUrls;
-
+    setIsSavingProduct(true);
     try {
+      const finalImages = selectedImageFiles.length > 0
+        ? await Promise.all(selectedImageFiles.map(fileToDataUrl))
+        : productImageUrls;
+
       await addProduct({
       name,
       nameFa,
@@ -249,6 +277,8 @@ export const AdminPanel: React.FC = () => {
       const detail = error instanceof Error ? error.message : 'خطای ناشناخته';
       alert(`ذخیره محصول انجام نشد: ${detail}`);
       return;
+    } finally {
+      setIsSavingProduct(false);
     }
 
     alert('محصول جدید با موفقیت به فروشگاه اضافه شد.');
@@ -666,6 +696,17 @@ export const AdminPanel: React.FC = () => {
             </div>
 
             <div>
+              <label className="block text-slate-700 mb-1">دسته‌بندی محصول *</label>
+              <select value={category} onChange={e => setCategory(e.target.value as Category)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900">
+                <option value="رانینگ">رانینگ</option>
+                <option value="جردن">جردن</option>
+                <option value="نایک">نایک</option>
+                <option value="باشگاه">باشگاه</option>
+                <option value="کلاسیک">کلاسیک</option>
+              </select>
+            </div>
+
+            <div>
               <label className="block text-slate-700 mb-1">جنسیت محصول *</label>
               <select value={gender} onChange={e => setGender(e.target.value as ProductGender)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900">
                 <option value="مردانه">مردانه</option><option value="زنانه">زنانه</option><option value="یونیسکس">یونیسکس</option>
@@ -864,9 +905,12 @@ export const AdminPanel: React.FC = () => {
             <div className="sm:col-span-2 pt-2">
               <button
                 type="submit"
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-cyan-500/20 text-sm"
+                disabled={isSavingProduct}
+                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-cyan-500/20 text-sm disabled:cursor-wait disabled:opacity-70"
               >
-                ذخیره و افزودن به فروشگاه
+                {isSavingProduct ? (
+                  <span className="inline-flex items-center gap-2"><RefreshCw className="h-4 w-4 animate-spin" />در حال فشرده‌سازی تصاویر و ذخیره محصول…</span>
+                ) : 'ذخیره و افزودن به فروشگاه'}
               </button>
             </div>
           </form>

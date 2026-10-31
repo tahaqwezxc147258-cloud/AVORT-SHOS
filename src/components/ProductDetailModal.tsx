@@ -11,6 +11,8 @@ interface ProductDetailModalProps {
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClose }) => {
   const { toggleWishlist, isWishlisted, addToCart, setViewMode } = useStore();
   const wishlisted = isWishlisted(product.id);
+  const isAvailable = product.inStock && product.stockCount > 0;
+  const canOrder = isAvailable && product.sizes.length > 0 && product.colors.length > 0;
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<number>(product.sizes[0] || 42);
@@ -29,6 +31,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
   };
 
   const handleAddToCart = () => {
+    if (!canOrder) return;
     addToCart(product, selectedSize, selectedColor, quantity, withSpecialBox);
     setAddedAnimation(true);
     setTimeout(() => {
@@ -88,6 +91,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                 {product.priceToman.toLocaleString('fa-IR')} <span className="text-xs font-bold">تومان</span>
               </span>
             </div>
+            {!isAvailable ? (
+              <p className="mt-3 rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">
+                این محصول اتمام موجودی است؛ امکان سفارش ندارد.
+              </p>
+            ) : !canOrder ? (
+              <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">
+                اطلاعات سایز یا رنگ این محصول برای سفارش کامل نیست.
+              </p>
+            ) : (
+              <p className="mt-2 text-xs font-bold text-emerald-700">موجودی: {product.stockCount.toLocaleString('fa-IR')} جفت</p>
+            )}
           </div>
 
           {/* Elevated 3D Shoe Canvas with Navigation Carousel (< >) */}
@@ -104,7 +118,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
             )}
 
             {/* Main Shoe Image in 3D perspective angle */}
-            <div className="relative w-full max-w-[320px] h-52 flex items-center justify-center">
+            <div className={`relative w-full max-w-[320px] h-52 flex items-center justify-center ${isAvailable ? '' : 'grayscale opacity-60'}`}>
               <button
                 type="button"
                 onClick={() => setIsImageZoomed(true)}
@@ -251,7 +265,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
           <div className="bg-cyan-50/80 rounded-3xl p-4 flex items-center justify-between border border-cyan-100">
             <span className="font-black text-slate-900 text-xs sm:text-sm">تعداد سفارش:</span>
             <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((qty) => (
+              {Array.from({ length: Math.min(5, Math.floor(Math.max(0, product.stockCount))) }, (_, index) => index + 1).map((qty) => (
                 <button
                   key={qty}
                   type="button"
@@ -271,14 +285,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
           {/* Add To Bag Action Button matching Image 1 */}
           <button
             onClick={handleAddToCart}
-            disabled={addedAnimation}
-            className={`w-full py-4 rounded-3xl font-extrabold text-sm sm:text-base text-white flex items-center justify-center gap-3 shadow-xl transition-all duration-300 ${
-              addedAnimation
-                ? 'bg-emerald-500 shadow-emerald-500/30'
-                : 'bg-cyan-500 hover:bg-cyan-600 shadow-cyan-500/30 active:scale-98'
+            disabled={!canOrder || addedAnimation}
+            className={`w-full py-4 rounded-3xl font-extrabold text-sm sm:text-base flex items-center justify-center gap-3 shadow-xl transition-all duration-300 ${
+              !canOrder
+                ? 'bg-slate-300 text-slate-600 cursor-not-allowed shadow-none'
+                : addedAnimation
+                ? 'bg-emerald-500 text-white shadow-emerald-500/30'
+                : 'bg-cyan-500 text-white hover:bg-cyan-600 shadow-cyan-500/30 active:scale-98'
             }`}
           >
-            {addedAnimation ? (
+            {!canOrder ? (
+              <span>{!isAvailable ? 'ناموجود؛ سفارش ممکن نیست' : 'اطلاعات سفارش محصول ناقص است'}</span>
+            ) : addedAnimation ? (
               <>
                 <Check className="w-5 h-5" />
                 <span>با موفقیت به سبد افزوده شد</span>

@@ -53,7 +53,6 @@ export const NewsletterFooter: React.FC = () => {
               height={72}
               loading="lazy"
               className="h-[72px] w-[72px] object-contain"
-              code="w40rZvRfboztUEStJQMazJQw6bzHxHY5"
             />
           </a>
         </div>

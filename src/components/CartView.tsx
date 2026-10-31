@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, ArrowRight, Tag } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ShieldCheck, ArrowRight } from 'lucide-react';
 import { Address } from '../types';
 
 export const CartView: React.FC = () => {
@@ -12,7 +12,6 @@ export const CartView: React.FC = () => {
     user,
     initiateCheckout,
     setViewMode,
-    setIsLoginModalOpen,
     updateUserProfile
   } = useStore();
 
@@ -24,9 +23,6 @@ export const CartView: React.FC = () => {
   const [address, setAddress] = useState<string>(activeAddress?.address || '');
   const [postalCode, setPostalCode] = useState<string>(activeAddress?.postalCode || '');
   const [selectedAddressId, setSelectedAddressId] = useState<string>(activeAddress?.id || '');
-  const [couponCode, setCouponCode] = useState<string>('');
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
-  const [couponMessage, setCouponMessage] = useState<string>('');
   
 
   useEffect(() => {
@@ -51,30 +47,15 @@ export const CartView: React.FC = () => {
 
   const itemsSubtotal = cart.reduce((sum, item) => sum + (item.product.priceToman * item.quantity), 0);
   const packagingTotal = cart.reduce((sum, item) => sum + (item.withSpecialBox ? (item.product.specialBoxPrice || 350000) * item.quantity : 0), 0);
-  const discountAmount = Math.round((itemsSubtotal * discountPercent) / 100);
   const finalTotal = itemsSubtotal + packagingTotal;
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (couponCode.toUpperCase() === 'EIVORT2026') {
-      setDiscountPercent(15);
-      setCouponMessage('کد تخفیف ۱۵٪ جشنواره با موفقیت اعمال شد!');
-    } else {
-      setDiscountPercent(0);
-      setCouponMessage('کد تخفیف وارد شده معتبر نیست.');
-    }
-  };
+  const hasUnavailableItems = cart.some(item =>
+    !item.product.inStock || item.product.stockCount <= 0 || item.quantity > item.product.stockCount
+  );
 
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!receiverName || !phone || !address) {
+    if (!receiverName || !phone || !city || !address || !postalCode) {
       alert('لطفا اطلاعات تحویل‌گیرنده و آدرس ارسال را تکمیل نمایید.');
-      return;
-    }
-
-    if (false) {
-      setIsLoginModalOpen(true);
-      alert('برای ادامه‌ی پرداخت لطفاً وارد حساب کاربری شوید.');
       return;
     }
 
@@ -125,7 +106,7 @@ export const CartView: React.FC = () => {
       <div className="flex items-center justify-between pb-4 border-b border-cyan-100">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900">سبد خرید و تسویه‌حساب</h1>
-          <p className="text-xs text-slate-500 mt-1">تعداد محصولات انتخاب شده: {cart.length} جفت</p>
+          <p className="text-xs text-slate-500 mt-1">تعداد جفت‌ها: {cart.reduce((sum, item) => sum + item.quantity, 0).toLocaleString('fa-IR')}</p>
         </div>
         <button
           onClick={clearCart}
@@ -155,6 +136,8 @@ export const CartView: React.FC = () => {
                       src={item.product.images[0]}
                       alt={item.product.name}
                       className="w-full h-full object-contain filter drop-shadow-xs"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 
@@ -183,7 +166,9 @@ export const CartView: React.FC = () => {
                     <div className="flex items-center gap-2 bg-slate-100 rounded-xl p-1">
                       <button
                         onClick={() => updateCartQuantity(item.product.id, item.selectedSize, item.selectedColor.name, 1)}
-                        className="w-7 h-7 bg-white rounded-lg text-slate-700 flex items-center justify-center font-bold hover:bg-cyan-500 hover:text-white transition-colors"
+                        disabled={!item.product.inStock || item.quantity >= item.product.stockCount}
+                        aria-label="افزایش تعداد"
+                        className="w-7 h-7 bg-white rounded-lg text-slate-700 flex items-center justify-center font-bold hover:bg-cyan-500 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -194,6 +179,7 @@ export const CartView: React.FC = () => {
 
                       <button
                         onClick={() => updateCartQuantity(item.product.id, item.selectedSize, item.selectedColor.name, -1)}
+                        aria-label="کاهش تعداد"
                         className="w-7 h-7 bg-white rounded-lg text-slate-700 flex items-center justify-center font-bold hover:bg-rose-500 hover:text-white transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
@@ -278,9 +264,10 @@ export const CartView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">کد پستی ۱۰ رقمی</label>
+                <label className="block text-slate-700 font-bold mb-1">کد پستی ۱۰ رقمی *</label>
                 <input
                   type="text"
+                  required
                   placeholder="۱۹۸۷۶۵۴۳۲۱"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
@@ -317,60 +304,56 @@ export const CartView: React.FC = () => {
                 <span className="text-slate-900 font-extrabold">{itemsSubtotal.toLocaleString('fa-IR')} تومان</span>
               </div>
 
-              <div className="flex items-center justify-between gap-4 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                <div><span className="font-black">????????</span><a href="/shipping" className="mr-2 font-bold underline underline-offset-2">????? ????? ? ?????? ????? ?????</a></div>
-                <span className="font-bold whitespace-nowrap">?????? ??? ????</span>
-              </div>
-              {false && discountAmount > 0 && (
-                <div className="flex justify-between text-rose-500">
-                  <span>تخفیف کد EIVORT2026:</span>
-                  <span className="font-extrabold">- {discountAmount.toLocaleString('fa-IR')} تومان</span>
+              {packagingTotal > 0 && (
+                <div className="flex justify-between">
+                  <span>هزینه جعبه ویژه:</span>
+                  <span className="text-slate-900 font-extrabold">{packagingTotal.toLocaleString('fa-IR')} تومان</span>
                 </div>
               )}
-
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <span className="font-black">هزینه ارسال</span>
+                <span className="text-left leading-5">پس‌کرایه؛ هزینه پست هنگام تحویل سفارش پرداخت می‌شود.</span>
+              </div>
               <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-sm font-black text-slate-900">
                 <span>مبلغ قابل پرداخت:</span>
                 <span className="text-xl text-cyan-600">{finalTotal.toLocaleString('fa-IR')} <span className="text-xs">تومان</span></span>
               </div>
             </div>
 
-            {false && <>
-            {/* Coupon Code Input */}
-            <form onSubmit={handleApplyCoupon} className="pt-2">
-              <label className="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1">
-                <Tag className="w-3.5 h-3.5 text-cyan-500" />
-                <span>کد تخفیف داری؟ (تست: EIVORT2026)</span>
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="کد تخفیف"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dir-ltr text-center uppercase"
+            <div className="flex justify-center border-t border-slate-100 pt-4">
+              <a
+                href="https://trustseal.enamad.ir/?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="مشاهده نماد اعتماد الکترونیکی"
+              >
+                <img
+                  referrerPolicy="origin"
+                  src="https://trustseal.enamad.ir/logo.aspx?id=774223&Code=w40rZvRfboztUEStJQMazJQw6bzHxHY5"
+                  alt="نماد اعتماد الکترونیکی"
+                  width={72}
+                  height={72}
+                  loading="lazy"
+                  className="h-[72px] w-[72px] object-contain"
                 />
-                <button
-                  type="submit"
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors"
-                >
-                  اعمال
-                </button>
-              </div>
-              {couponMessage && (
-                <p className={`text-[11px] font-bold mt-1.5 ${discountPercent > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                  {couponMessage}
-                </p>
-              )}
-            </form></>}
+              </a>
+            </div>
 
             {/* Payment Button leading to Zarinpal Gateway */}
             <button
               onClick={handleProceedToPayment}
-              className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 border border-amber-300"
+              disabled={hasUnavailableItems}
+              className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 border border-amber-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
               <CreditCard className="w-5 h-5" />
-              <span>پرداخت آنلاین از طریق درگاه زرین‌پال</span>
+              <span>{hasUnavailableItems ? 'موجودی سبد خرید را اصلاح کنید' : 'پرداخت آنلاین از طریق درگاه زرین‌پال'}</span>
             </button>
+
+            {hasUnavailableItems && (
+              <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold leading-5 text-rose-700">
+                یک یا چند محصول سبد خرید ناموجود شده یا تعداد آن از موجودی بیشتر است؛ برای ادامه، آن‌ها را حذف یا تعدادشان را اصلاح کنید.
+              </p>
+            )}
 
             <div className="bg-cyan-50 border border-cyan-100 rounded-2xl p-3 flex items-start gap-2.5 text-cyan-800 text-[11px]">
               <ShieldCheck className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />

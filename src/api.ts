@@ -32,7 +32,7 @@ export async function request<T = any>(path: string, opts: RequestOptions = {}):
   // not a Supabase Auth access token. Keep the app token first so configuring
   // Supabase for data access cannot silently turn valid API requests into 401s.
   const appToken = localStorage.getItem('noir_token');
-  const { data: { session } } = supabase
+  const { data: { session } } = !appToken && supabase
     ? await supabase.auth.getSession()
     : { data: { session: null } };
   const token = appToken || session?.access_token;
@@ -63,7 +63,7 @@ export const api = {
   get: <T = any>(path: string, query?: Record<string, any>) => request<T>(path, { method: 'GET', query }),
   post: <T = any>(path: string, body?: any) => request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined }),
   put: <T = any>(path: string, body?: any) => request<T>(path, { method: 'PUT', body: body ? JSON.stringify(body) : undefined }),
-  del: <T = any>(path: string) => request<T>(path, { method: 'DELETE' }),
+  del: <T = any>(path: string, query?: Record<string, any>) => request<T>(path, { method: 'DELETE', query }),
 };
 
 export default api;

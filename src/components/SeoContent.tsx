@@ -5,7 +5,7 @@ export const SeoContent: React.FC = () => (
     <div className="rounded-3xl border border-cyan-100 bg-white p-6 sm:p-8 shadow-sm">
       <h2 id="seo-content-title" className="text-xl font-black text-slate-900">خرید کتونی با کیفیت و انتخاب مطمئن</h2>
       <p className="mt-3 text-sm leading-8 text-slate-600">
-        در فروشگاه ایوُرت می‌توانید مدل‌های متنوع کتونی را با تصاویر واقعی، مشخصات کامل، رنگ‌ها و سایزهای موجود بررسی کنید. محصولات ما با تمرکز بر کیفیت ساخت، راحتی و ارزش خرید انتخاب شده‌اند.
+        در فروشگاه آورت می‌توانید مدل‌های متنوع کتونی را با تصاویر، مشخصات، رنگ‌ها و سایزهای موجود بررسی کنید. اطلاعات هر محصول را با نیاز و نوع استفاده خود مقایسه کنید تا انتخاب آگاهانه‌تری داشته باشید.
       </p>
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         <details className="rounded-2xl bg-cyan-50/60 p-4">

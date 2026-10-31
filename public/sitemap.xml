@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://avort.ir/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://avort.ir/shop</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://avort.ir/collection/jordan</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://avort.ir/collection/nike</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://avort.ir/collection/women</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://avort.ir/articles</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://avort.ir/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://avort.ir/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
@@ -18,4 +21,28 @@
   <url><loc>https://avort.ir/articles/everyday-style-shoes</loc><priority>0.7</priority></url>
   <url><loc>https://avort.ir/articles/clean-white-shoes</loc><priority>0.7</priority></url>
   <url><loc>https://avort.ir/articles/shoe-care-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-trends-2026</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/jordan-history</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/nike-running-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-outfit-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-storage</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/comfortable-sneakers</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/choose-sneakers-for-daily-walking</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/running-shoes-beginners-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/online-shoe-size-measurement</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/check-shoe-authenticity-before-buying</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/clean-white-sneakers-at-home</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-materials-explained</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-smell-and-moisture-care</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-outfit-color-matching</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneakers-for-work-and-standing</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-care-and-storage-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/choose-sneakers-by-foot-shape</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/buy-sneakers-online-safely</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-socks-and-fit</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-buying-budget-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-travel-and-city-walking</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-color-and-wardrobe-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-laces-and-fit-adjustment</loc><priority>0.7</priority></url>
+  <url><loc>https://avort.ir/articles/sneaker-soles-wear-and-replacement</loc><priority>0.7</priority></url>
 </urlset>
